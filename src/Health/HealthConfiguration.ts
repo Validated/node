@@ -1,7 +1,6 @@
 import { LoggingConfiguration } from 'Configuration'
 
-export interface APIConfiguration extends LoggingConfiguration {
-  readonly port: number
+export interface HealthConfiguration extends LoggingConfiguration {
   readonly dbUrl: string
   readonly rabbitmqUrl: string
   readonly ipfsUrl: string

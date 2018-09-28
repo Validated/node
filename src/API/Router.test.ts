@@ -6,6 +6,7 @@ import { describe } from 'riteway'
 import { Router } from './Router'
 import { RouterConfiguration } from './RouterConfiguration'
 import { WorkController } from './WorkController'
+import { HealthController } from './HealthController'
 
 describe('API Router', async (should: any) => {
   const { assert } = should('')
@@ -15,9 +16,9 @@ describe('API Router', async (should: any) => {
   const port = 3000
   const server = new Server(host, port)
   const workController = new WorkController(Pino(), new Db('poet', server), new Messaging())
-
+  const healthController = new HealthController(new Db('poet', server))
   {
-    const router = new Router(Pino(), configuration, workController)
+    const router = new Router(Pino(), configuration, workController, healthController)
 
     assert({
       given: 'the new instance of Router',

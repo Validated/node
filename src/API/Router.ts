@@ -24,6 +24,7 @@ import { RequestValidationMiddleware } from './Middlewares/RequestValidationMidd
 import { RouterConfiguration } from './RouterConfiguration'
 import { SecurityHeaders } from './SecurityHeaders'
 import { WorkController } from './WorkController'
+import { HealthController } from './HealthController'
 
 @injectable()
 export class Router {
@@ -32,16 +33,19 @@ export class Router {
   private readonly koa = new Koa()
   private readonly koaRouter = new KoaRouter()
   private readonly workController: WorkController
+  private readonly healthController: HealthController
   private server: http.Server
 
   constructor(
     @inject('Logger') logger: Pino.Logger,
     @inject('RouterConfiguration') configuration: RouterConfiguration,
-    @inject('WorkController') workController: WorkController
+    @inject('WorkController') workController: WorkController,
+    @inject('HealthController') healthController: HealthController
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.configuration = configuration
     this.workController = workController
+    this.healthController = healthController
 
     const getWorkSchema = {
       params: {
@@ -60,6 +64,7 @@ export class Router {
     this.koaRouter.get('/works/:id', RequestValidationMiddleware(getWorkSchema), this.getWork)
     this.koaRouter.get('/works', RequestValidationMiddleware(getWorksSchema), this.getWorks)
     this.koaRouter.post('/works', this.postWork)
+    this.koaRouter.get('/health', this.getHealth)
 
     this.koa.use(helmet(SecurityHeaders))
     this.koa.use(KoaCors({ expose: ['X-Total-Count'] }))
@@ -88,6 +93,11 @@ export class Router {
     if (!work) throw new NotFoundException('')
 
     context.body = work
+  }
+
+  private getHealth = async (context: KoaRouter.IRouterContext, next: () => Promise<any>) => {
+    const connection = await this.healthController.checkMongoConnection()
+    if( connection === 1) context.status = 200
   }
 
   private getWorks = async (context: KoaRouter.IRouterContext, next: () => Promise<any>) => {

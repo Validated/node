@@ -49,6 +49,7 @@ export async function app() {
     port: configuration.apiPort,
     dbUrl: configuration.mongodbUrl,
     rabbitmqUrl: configuration.rabbitmqUrl,
+    ipfsUrl: configuration.ipfsUrl,
   })
 
   try {

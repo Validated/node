@@ -1,33 +1,33 @@
 import { injectable, Container } from 'inversify'
-import { MongoClient, Db } from 'mongodb'
+import { Db, MongoClient } from 'mongodb'
 import * as Pino from 'pino'
 
 import { createModuleLogger } from 'Helpers/Logging'
 import { Messaging } from 'Messaging/Messaging'
 
-import { APIConfiguration } from './APIConfiguration'
 import { Router } from './Router'
-import { RouterConfiguration } from './RouterConfiguration'
-import { WorkController } from './WorkController'
+import { HealthConfiguration } from './HealthConfiguration'
 import { HealthController } from './HealthController'
+import { IPFS } from './IPFS'
+import { IPFSConfiguration } from './IPFSConfiguration'
 
 @injectable()
-export class API {
+export class Health {
   private readonly logger: Pino.Logger
-  private readonly configuration: APIConfiguration
+  private readonly configuration: HealthConfiguration
   private readonly container = new Container()
   private mongoClient: MongoClient
   private dbConnection: Db
   private router: Router
   private messaging: Messaging
 
-  constructor(configuration: APIConfiguration) {
+  constructor(configuration: HealthConfiguration) {
     this.configuration = configuration
     this.logger = createModuleLogger(configuration, __dirname)
   }
 
   async start() {
-    this.logger.info({ configuration: this.configuration }, 'API Starting')
+    this.logger.info({ configuration: this.configuration }, 'Health Starting')
     this.mongoClient = await MongoClient.connect(this.configuration.dbUrl)
     this.dbConnection = await this.mongoClient.db()
 
@@ -39,25 +39,25 @@ export class API {
     this.router = this.container.get('Router')
     await this.router.start()
 
-    this.logger.info('API Started')
+    this.logger.info('Health Started')
   }
 
   async stop() {
-    this.logger.info('Stopping API...')
-    this.logger.info('Stopping API Database...')
-    await this.mongoClient.close()
+    this.logger.info('Stopping Health...')
     await this.router.stop()
-    this.logger.info('Stopping API Messaging...')
-    await this.messaging.stop()
+    this.logger.info('Stopping Health Database...')
+    await this.mongoClient.close()
   }
 
   initializeContainer() {
     this.container.bind<Pino.Logger>('Logger').toConstantValue(this.logger)
     this.container.bind<Db>('DB').toConstantValue(this.dbConnection)
     this.container.bind<Router>('Router').to(Router)
-    this.container.bind<RouterConfiguration>('RouterConfiguration').toConstantValue({ port: this.configuration.port })
-    this.container.bind<WorkController>('WorkController').to(WorkController)
     this.container.bind<HealthController>('HealthController').to(HealthController)
+    this.container.bind<IPFS>('IFPS').to(IPFS)
+    this.container.bind<IPFSConfiguration>('IPFSConfiguration').toConstantValue({
+      ipfsUrl: this.configuration.ipfsUrl,
+    })
     this.container.bind<Messaging>('Messaging').toConstantValue(this.messaging)
   }
 }
