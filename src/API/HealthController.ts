@@ -13,7 +13,7 @@ export class HealthController {
   }
 
   async checkMongoConnection(): Promise<any> {
-    const connection = await this.db.stats()
-    return connection.ok
+    const connection = await this.collection.findOne({ name: 'mongoHealth' })
+    return connection.status === 1 ? 'connected' : 'not connected'
   }
 }

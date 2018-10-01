@@ -1,3 +1,4 @@
+import BitcoinCore = require('bitcoin-core')
 import { injectable, Container } from 'inversify'
 import { Db, MongoClient } from 'mongodb'
 import * as Pino from 'pino'
@@ -5,11 +6,12 @@ import * as Pino from 'pino'
 import { createModuleLogger } from 'Helpers/Logging'
 import { Messaging } from 'Messaging/Messaging'
 
-import { Router } from './Router'
+import { HealthService } from './HealthService'
 import { HealthConfiguration } from './HealthConfiguration'
 import { HealthController } from './HealthController'
-import { IPFS } from './IPFS'
-import { IPFSConfiguration } from './IPFSConfiguration'
+import { HealthServiceConfiguration } from './HealthServiceConfiguration';
+// import { IPFS } from './IPFS'
+// import { IPFSConfiguration } from './IPFSConfiguration'
 
 @injectable()
 export class Health {
@@ -18,7 +20,7 @@ export class Health {
   private readonly container = new Container()
   private mongoClient: MongoClient
   private dbConnection: Db
-  private router: Router
+  private cron: HealthService
   private messaging: Messaging
 
   constructor(configuration: HealthConfiguration) {
@@ -36,15 +38,15 @@ export class Health {
 
     this.initializeContainer()
 
-    this.router = this.container.get('Router')
-    await this.router.start()
+    this.cron = this.container.get('Cron')
+    await this.cron.start()
 
     this.logger.info('Health Started')
   }
 
   async stop() {
     this.logger.info('Stopping Health...')
-    await this.router.stop()
+    await this.cron.stop()
     this.logger.info('Stopping Health Database...')
     await this.mongoClient.close()
   }
@@ -52,12 +54,24 @@ export class Health {
   initializeContainer() {
     this.container.bind<Pino.Logger>('Logger').toConstantValue(this.logger)
     this.container.bind<Db>('DB').toConstantValue(this.dbConnection)
-    this.container.bind<Router>('Router').to(Router)
+    this.container.bind<HealthService>('Cron').to(HealthService)
     this.container.bind<HealthController>('HealthController').to(HealthController)
-    this.container.bind<IPFS>('IFPS').to(IPFS)
-    this.container.bind<IPFSConfiguration>('IPFSConfiguration').toConstantValue({
-      ipfsUrl: this.configuration.ipfsUrl,
-    })
+    // this.container.bind<IPFS>('IFPS').to(IPFS)
+    // this.container.bind<IPFSConfiguration>('IPFSConfiguration').toConstantValue({
+    //   ipfsUrl: this.configuration.ipfsUrl,
+    // })
     this.container.bind<Messaging>('Messaging').toConstantValue(this.messaging)
+    this.container.bind<BitcoinCore>('BitcoinCore').toConstantValue(
+      new BitcoinCore({
+        host: this.configuration.bitcoinUrl,
+        port: this.configuration.bitcoinPort,
+        network: this.configuration.bitcoinNetwork,
+        username: this.configuration.bitcoinUsername,
+        password: this.configuration.bitcoinPassword,
+      })
+    )
+    this.container.bind<HealthServiceConfiguration>('HealthServiceConfiguration').toConstantValue({
+      healthIntervalInSeconds: this.configuration.healthIntervalInSeconds,
+    })
   }
 }

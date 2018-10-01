@@ -20,7 +20,8 @@ export interface Configuration extends LoggingConfiguration, BitcoinRPCConfigura
   readonly mongodbDatabase: string
   readonly mongodbUrl: string
   readonly ipfsUrl: string
-
+  readonly healthIntervalInSeconds: number
+  
   readonly apiPort: number
 
   readonly poetNetwork: string
@@ -91,6 +92,8 @@ const defaultConfiguration: Configuration = {
 
   enableTimestamping: false,
   timestampIntervalInSeconds: 30,
+
+  healthIntervalInSeconds: 30,
 
   downloadIntervalInSeconds: 5,
   downloadRetryDelayInMinutes: 10,

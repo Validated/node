@@ -97,7 +97,7 @@ export class Router {
 
   private getHealth = async (context: KoaRouter.IRouterContext, next: () => Promise<any>) => {
     const connection = await this.healthController.checkMongoConnection()
-    if( connection === 1) context.status = 200
+    if( connection === 'connected') context.status = 200
   }
 
   private getWorks = async (context: KoaRouter.IRouterContext, next: () => Promise<any>) => {

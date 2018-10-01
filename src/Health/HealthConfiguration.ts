@@ -1,6 +1,9 @@
-import { LoggingConfiguration } from 'Configuration'
+import { LoggingConfiguration, BitcoinRPCConfiguration } from 'Configuration'
 
-export interface HealthConfiguration extends LoggingConfiguration {
+import { HealthServiceConfiguration } from './HealthServiceConfiguration'
+
+
+export interface HealthConfiguration extends LoggingConfiguration, BitcoinRPCConfiguration, HealthServiceConfiguration {
   readonly dbUrl: string
   readonly rabbitmqUrl: string
   readonly ipfsUrl: string

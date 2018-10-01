@@ -11,6 +11,7 @@ import { BatchReader } from 'BatchReader/BatchReader'
 import { BatchWriter } from 'BatchWriter/BatchWriter'
 import { BlockchainReader } from 'BlockchainReader/BlockchainReader'
 import { BlockchainWriter } from 'BlockchainWriter/BlockchainWriter'
+import { Health } from 'Health/Health'
 import { loadConfigurationWithDefaults } from 'Configuration'
 import { StorageReader } from 'StorageReader/StorageReader'
 import { StorageWriter } from 'StorageWriter/StorageWriter'
@@ -170,6 +171,25 @@ export async function app(localVars: any = {}) {
     logger.error({ exception }, 'BlockchainReader was unable to start')
   }
 
+  const health = new Health({
+      ...loggingConfiguration,
+      dbUrl: configuration.mongodbUrl,
+      rabbitmqUrl: configuration.rabbitmqUrl,
+      bitcoinUrl: configuration.bitcoinUrl,
+      bitcoinPort: configuration.bitcoinPort,
+      bitcoinNetwork: configuration.bitcoinNetwork,
+      bitcoinUsername: configuration.bitcoinUsername,
+      bitcoinPassword: configuration.bitcoinPassword,
+      ipfsUrl: configuration.ipfsUrl,
+      healthIntervalInSeconds: configuration.healthIntervalInSeconds,
+    })
+
+  try {
+    await health.start()
+  } catch (exception) {
+    logger.error({ exception }, 'Health was unable to start')
+  }
+
   return {
     stop: async () => {
       logger.info('Po.et node terminating...')
@@ -182,6 +202,7 @@ export async function app(localVars: any = {}) {
       await blockchainWriter.stop()
       await storageWriter.stop()
       await storage.stop()
+      await health.stop()
 
       logger.info('Po.et node terminated')
       return true
