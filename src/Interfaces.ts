@@ -15,3 +15,12 @@ export interface ClaimIdIPFSHashPair {
   readonly claimId: string
   readonly ipfsFileHash: string
 }
+
+export interface IPFSHashFailure {
+  readonly ipfsFileHash: string
+  readonly failureType: string
+  readonly failureReason: string
+}
+const hasFailureType = has('failureType')
+const hasFailureReason = has('failureReason')
+export const isIPFSHashFailure = allPass([hasIPFSFileHash, hasFailureReason, hasFailureType])

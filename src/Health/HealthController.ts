@@ -4,20 +4,20 @@ import { Collection, Db } from 'mongodb'
 import * as Pino from 'pino'
 
 import { childWithFileName } from 'Helpers/Logging'
+import { IPFSHashFailure } from 'Interfaces'
 
-import { IPFS } from './IPFS'
 
 @injectable()
 export class HealthController {
   private readonly db: Db
   private readonly collection: Collection
-  private readonly ipfs: IPFS
+  // private readonly ipfs: IPFS
   private readonly bitcoinCore: BitcoinCore
   private readonly logger: Pino.Logger
 
   constructor(
     @inject('Logger') logger: Pino.Logger,
-    @inject('IPFS') ipfs: IPFS,
+    // @inject('IPFS') ipfs: IPFS,
     @inject('DB') db: Db,
     @inject('BitcoinCore') bitcoinCore: BitcoinCore
   ) {
@@ -25,7 +25,7 @@ export class HealthController {
     this.db = db
     this.collection = this.db.collection('health')
     this.bitcoinCore = bitcoinCore
-    this.ipfs = ipfs
+    // this.ipfs = ipfs
   }
 
   async checkMongoConnection(): Promise<any> {
@@ -48,11 +48,11 @@ export class HealthController {
     }
   }
 
-  async checkIpfsConnection(): Promise<any> {
-    this.logger.trace('ipfsHealth', 'Checking IPFS...')
-    const connection = await this.ipfs.checkHealth()
-    return connection
-  }
+  // async checkIpfsConnection(): Promise<any> {
+  //   this.logger.trace('ipfsHealth', 'Checking IPFS...')
+  //   const connection = await this.ipfs.checkHealth()
+  //   return connection
+  // }
 
   async getBlockchainInfo(): Promise<void> {
     const logger = this.logger.child({ method: 'getBlockchainInfo' })
@@ -146,5 +146,17 @@ export class HealthController {
     } else {
       await this.collection.insertOne({ name: 'networkInfo', networkInfo })
     }
+  }
+
+  async upsertIPFSFailure(ipfsHashFailures: ReadonlyArray<IPFSHashFailure>) {
+    this.logger.debug({ ipfsHashFailures }, 'Upserting Claims by IPFS Hash')
+    await Promise.all(
+      ipfsHashFailures.map(({ failureReason, failureType, ipfsFileHash }) => {
+        const existing = this.collection.find({ name: 'ipfsHashFailures' })
+        if (existing) this.collection.updateOne({ 'ipfsHashFailures.ipfsFileHashes.ipfsFileHash': ipfsFileHash }, { $set: { 'ipfsHashFailures.ipfsFileHashes.$.failureType' : failureType, 'ipfsHashFailures.ipfsFileHashes.$.failureReason': failureReason } }, { upsert: true })
+        else this.collection.insertOne({ name: 'ipfsHashFailures', ipfsHashFailures: { 'ipfsFileHashes': [{ipfsFileHash, failureReason, failureType}] } })
+      }
+      )
+    )
   }
 }
