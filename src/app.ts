@@ -11,8 +11,8 @@ import { BatchReader } from 'BatchReader/BatchReader'
 import { BatchWriter } from 'BatchWriter/BatchWriter'
 import { BlockchainReader } from 'BlockchainReader/BlockchainReader'
 import { BlockchainWriter } from 'BlockchainWriter/BlockchainWriter'
-import { Health } from 'Health/Health'
 import { loadConfigurationWithDefaults } from 'Configuration'
+import { Health } from 'Health/Health'
 import { StorageReader } from 'StorageReader/StorageReader'
 import { StorageWriter } from 'StorageWriter/StorageWriter'
 import { View } from 'View/View'
@@ -50,7 +50,6 @@ export async function app(localVars: any = {}) {
     port: configuration.apiPort,
     dbUrl: configuration.mongodbUrl,
     rabbitmqUrl: configuration.rabbitmqUrl,
-    ipfsUrl: configuration.ipfsUrl,
   })
 
   try {
@@ -172,17 +171,17 @@ export async function app(localVars: any = {}) {
   }
 
   const health = new Health({
-      ...loggingConfiguration,
-      dbUrl: configuration.mongodbUrl,
-      rabbitmqUrl: configuration.rabbitmqUrl,
-      bitcoinUrl: configuration.bitcoinUrl,
-      bitcoinPort: configuration.bitcoinPort,
-      bitcoinNetwork: configuration.bitcoinNetwork,
-      bitcoinUsername: configuration.bitcoinUsername,
-      bitcoinPassword: configuration.bitcoinPassword,
-      ipfsUrl: configuration.ipfsUrl,
-      healthIntervalInSeconds: configuration.healthIntervalInSeconds,
-    })
+    ...loggingConfiguration,
+    dbUrl: configuration.mongodbUrl,
+    rabbitmqUrl: configuration.rabbitmqUrl,
+    bitcoinUrl: configuration.bitcoinUrl,
+    bitcoinPort: configuration.bitcoinPort,
+    bitcoinNetwork: configuration.bitcoinNetwork,
+    bitcoinUsername: configuration.bitcoinUsername,
+    bitcoinPassword: configuration.bitcoinPassword,
+    ipfsUrl: configuration.ipfsUrl,
+    healthIntervalInSeconds: configuration.healthIntervalInSeconds,
+  })
 
   try {
     await health.start()

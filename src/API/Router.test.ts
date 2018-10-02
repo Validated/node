@@ -3,10 +3,10 @@ import { Db, Server } from 'mongodb'
 import * as Pino from 'pino'
 import { describe } from 'riteway'
 
+import { HealthController } from './HealthController'
 import { Router } from './Router'
 import { RouterConfiguration } from './RouterConfiguration'
 import { WorkController } from './WorkController'
-import { HealthController } from './HealthController'
 
 describe('API Router', async (should: any) => {
   const { assert } = should('')

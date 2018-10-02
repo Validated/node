@@ -18,13 +18,13 @@ import * as Pino from 'pino'
 
 import { childWithFileName } from 'Helpers/Logging'
 
+import { HealthController } from './HealthController'
 import { HttpExceptionsMiddleware } from './Middlewares/HttpExceptionsMiddleware'
 import { LoggerMiddleware } from './Middlewares/LoggerMiddleware'
 import { RequestValidationMiddleware } from './Middlewares/RequestValidationMiddleware'
 import { RouterConfiguration } from './RouterConfiguration'
 import { SecurityHeaders } from './SecurityHeaders'
 import { WorkController } from './WorkController'
-import { HealthController } from './HealthController'
 
 @injectable()
 export class Router {
@@ -96,8 +96,13 @@ export class Router {
   }
 
   private getHealth = async (context: KoaRouter.IRouterContext, next: () => Promise<any>) => {
-    const connection = await this.healthController.checkMongoConnection()
-    if( connection === 'connected') context.status = 200
+    const { isConnected, blockchainInfo, walletInfo, networkInfo } = await this.healthController.getHealth()
+    context.body = {
+      mongoIsConnected: isConnected,
+      blockchainInfo,
+      walletInfo,
+      networkInfo,
+    }
   }
 
   private getWorks = async (context: KoaRouter.IRouterContext, next: () => Promise<any>) => {

@@ -6,12 +6,12 @@ import * as Pino from 'pino'
 import { createModuleLogger } from 'Helpers/Logging'
 import { Messaging } from 'Messaging/Messaging'
 
-import { HealthService } from './HealthService'
 import { HealthConfiguration } from './HealthConfiguration'
 import { HealthController } from './HealthController'
-import { HealthServiceConfiguration } from './HealthServiceConfiguration';
-// import { IPFS } from './IPFS'
-// import { IPFSConfiguration } from './IPFSConfiguration'
+import { HealthService } from './HealthService'
+import { HealthServiceConfiguration } from './HealthServiceConfiguration'
+import { IPFS } from './IPFS'
+import { IPFSConfiguration } from './IPFSConfiguration'
 
 @injectable()
 export class Health {
@@ -56,10 +56,10 @@ export class Health {
     this.container.bind<Db>('DB').toConstantValue(this.dbConnection)
     this.container.bind<HealthService>('Cron').to(HealthService)
     this.container.bind<HealthController>('HealthController').to(HealthController)
-    // this.container.bind<IPFS>('IFPS').to(IPFS)
-    // this.container.bind<IPFSConfiguration>('IPFSConfiguration').toConstantValue({
-    //   ipfsUrl: this.configuration.ipfsUrl,
-    // })
+    this.container.bind<IPFS>('IFPS').to(IPFS)
+    this.container.bind<IPFSConfiguration>('IPFSConfiguration').toConstantValue({
+      ipfsUrl: this.configuration.ipfsUrl,
+    })
     this.container.bind<Messaging>('Messaging').toConstantValue(this.messaging)
     this.container.bind<BitcoinCore>('BitcoinCore').toConstantValue(
       new BitcoinCore({

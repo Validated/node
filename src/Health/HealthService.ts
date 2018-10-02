@@ -37,7 +37,11 @@ export class HealthService {
     this.interval.stop()
   }
 
-  private getHealth = async ():Promise<any> => {
+  private getHealth = async (): Promise<any> => {
     await this.controller.checkMongoConnection()
+    await this.controller.getBlockchainInfo()
+    await this.controller.getWalletInfo()
+    await this.controller.getNetworkInfo()
+    await this.controller.checkIpfsConnection()
   }
 }

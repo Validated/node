@@ -21,7 +21,7 @@ export interface Configuration extends LoggingConfiguration, BitcoinRPCConfigura
   readonly mongodbUrl: string
   readonly ipfsUrl: string
   readonly healthIntervalInSeconds: number
-  
+
   readonly apiPort: number
 
   readonly poetNetwork: string

@@ -6,10 +6,10 @@ import { createModuleLogger } from 'Helpers/Logging'
 import { Messaging } from 'Messaging/Messaging'
 
 import { APIConfiguration } from './APIConfiguration'
+import { HealthController } from './HealthController'
 import { Router } from './Router'
 import { RouterConfiguration } from './RouterConfiguration'
 import { WorkController } from './WorkController'
-import { HealthController } from './HealthController'
 
 @injectable()
 export class API {
