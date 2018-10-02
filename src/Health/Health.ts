@@ -32,8 +32,8 @@ export class Health {
     this.logger.info({ configuration: this.configuration }, 'Health Starting')
     this.mongoClient = await MongoClient.connect(this.configuration.dbUrl)
     this.dbConnection = await this.mongoClient.db()
-
     this.messaging = new Messaging(this.configuration.rabbitmqUrl, this.configuration.exchanges)
+    
     await this.messaging.start()
 
     this.initializeContainer()

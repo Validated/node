@@ -226,7 +226,6 @@ export class ClaimController {
   private downloadEntryClaim = async ({ entry, ...rest }: { entry: Entry }) => {
     const { ipfsFileHash } = entry
     const downloadClaim = (ipfsFileHash: string) => this.ipfs.cat(ipfsFileHash).rethrow(errorToIPFSError(ipfsFileHash))
-    throw new InvalidClaim(ipfsFileHash, FailureReason.InvalidJson)
     
     const parseClaim = (ipfsFileHash: string, serialized: string) => {
       try {
