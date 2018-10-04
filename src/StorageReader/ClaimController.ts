@@ -88,7 +88,11 @@ export class ClaimController {
         }
       )
 
-    const publishEntryFailureReason = async (ipfsFileHash: string, failureType: FailureType, failureReason: FailureReason) =>{
+    const publishEntryFailureReason = async (
+      ipfsFileHash: string,
+      failureType: FailureType,
+      failureReason: FailureReason
+    ) => {
       const logger = this.logger.child({ method: 'publishEntryFailureReason' })
       logger.trace('started publishing')
 
@@ -96,10 +100,9 @@ export class ClaimController {
         {
           ipfsFileHash,
           failureType,
-          failureReason
-        }
-      ]);
-
+          failureReason,
+        },
+      ])
       logger.trace('finished publishing')
     }
 
@@ -117,12 +120,10 @@ export class ClaimController {
       else if (error instanceof InvalidClaim) {
         await updateEntryFailureReason(error.ipfsFileHash, FailureType.Hard, error.failureReason)
         await publishEntryFailureReason(error.ipfsFileHash, FailureType.Hard, error.failureReason)
-      }
-      else if (error instanceof IPFSTimeoutError){
+      } else if (error instanceof IPFSTimeoutError) {
         await updateEntryFailureReason(error.ipfsFileHash, FailureType.Soft, FailureReason.IPFSTimeout)
         await publishEntryFailureReason(error.ipfsFileHash, FailureType.Soft, FailureReason.IPFSTimeout)
-      }
-      else if (error instanceof IPFSGenericError) {
+      } else if (error instanceof IPFSGenericError) {
         logger.warn({ error })
         await updateEntryFailureReason(error.ipfsFileHash, FailureType.Soft, FailureReason.IPFSGeneric)
         await publishEntryFailureReason(error.ipfsFileHash, FailureType.Soft, FailureReason.IPFSGeneric)
@@ -226,7 +227,7 @@ export class ClaimController {
   private downloadEntryClaim = async ({ entry, ...rest }: { entry: Entry }) => {
     const { ipfsFileHash } = entry
     const downloadClaim = (ipfsFileHash: string) => this.ipfs.cat(ipfsFileHash).rethrow(errorToIPFSError(ipfsFileHash))
-    
+
     const parseClaim = (ipfsFileHash: string, serialized: string) => {
       try {
         return JSON.parse(serialized)
@@ -235,6 +236,7 @@ export class ClaimController {
       }
     }
     const logger = this.logger.child({ method: 'downloadEntryClaim' })
+    throw new InvalidClaim(ipfsFileHash, FailureReason.InvalidJson)
 
     logger.trace({ ipfsFileHash }, 'Starting claim download')
 

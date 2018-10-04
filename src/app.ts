@@ -11,8 +11,8 @@ import { BatchReader } from 'BatchReader/BatchReader'
 import { BatchWriter } from 'BatchWriter/BatchWriter'
 import { BlockchainReader } from 'BlockchainReader/BlockchainReader'
 import { BlockchainWriter } from 'BlockchainWriter/BlockchainWriter'
-import { Health } from 'Health/Health'
 import { loadConfigurationWithDefaults, Configuration } from 'Configuration'
+import { Health } from 'Health/Health'
 import { StorageReader } from 'StorageReader/StorageReader'
 import { StorageWriter } from 'StorageWriter/StorageWriter'
 import { View } from 'View/View'
@@ -138,6 +138,7 @@ export async function app(localVars: any = {}) {
       batchReaderReadNextDirectorySuccess: configuration.exchangeBatchReaderReadNextDirectorySuccess,
       poetAnchorDownloaded: configuration.exchangePoetAnchorDownloaded,
       claimsDownloaded: configuration.exchangeClaimsDownloaded,
+      claimsNotDownloaded: configuration.exchangeClaimsNotDownloaded,
     },
   })
   try {
@@ -229,8 +230,10 @@ export async function app(localVars: any = {}) {
     bitcoinPassword: configuration.bitcoinPassword,
     ipfsUrl: configuration.ipfsUrl,
     healthIntervalInSeconds: configuration.healthIntervalInSeconds,
-    exchanges: {}
-  });
+    exchanges: {
+      claimsNotDownloaded: configuration.exchangeClaimsNotDownloaded,
+    },
+  })
 
   try {
     await health.start()

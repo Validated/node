@@ -3,8 +3,8 @@ import { injectable, inject } from 'inversify'
 import * as Pino from 'pino'
 
 import { childWithFileName } from 'Helpers/Logging'
-import { Messaging } from 'Messaging/Messaging'
 import { IPFSHashFailure } from 'Interfaces'
+import { Messaging } from 'Messaging/Messaging'
 
 import { HealthController } from './HealthController'
 import { HealthServiceConfiguration } from './HealthServiceConfiguration'
@@ -40,22 +40,22 @@ export class HealthService {
     this.interval.stop()
   }
 
+  onClaimsNotDownloaded = async (ipfsHashFailures: ReadonlyArray<IPFSHashFailure>) => {
+    const logger = this.logger.child({ method: 'onClaimsNotDownloaded' })
+
+    logger.trace({ ipfsHashFailures }, 'IPFS Download Failure')
+    try {
+      await this.controller.updateIPFSFailure(ipfsHashFailures)
+    } catch (error) {
+      logger.error({ error }, 'Failed to upsert ipfsHashFailures on health')
+    }
+  }
+
   private getHealth = async (): Promise<any> => {
     await this.controller.checkMongoConnection()
     await this.controller.getBlockchainInfo()
     await this.controller.getWalletInfo()
     await this.controller.getNetworkInfo()
     await this.messaging.consumeClaimsNotDownloaded(this.onClaimsNotDownloaded)
-  }
-
-  onClaimsNotDownloaded = async (ipfsHashFailures: ReadonlyArray<IPFSHashFailure>) => {
-    const logger = this.logger.child({ method: 'onClaimsNotDownloaded' })
-
-    logger.trace({ ipfsHashFailures }, 'IPFS Download Failure')
-    try {
-      await this.controller.upsertIPFSFailure(ipfsHashFailures);
-    } catch (error) {
-      logger.error({ error }, 'Failed to upsert ipfsHashFailures on health')
-    }
   }
 }

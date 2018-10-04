@@ -6,7 +6,6 @@ import * as Pino from 'pino'
 import { childWithFileName } from 'Helpers/Logging'
 import { IPFSHashFailure } from 'Interfaces'
 
-
 @injectable()
 export class HealthController {
   private readonly db: Db
@@ -33,7 +32,8 @@ export class HealthController {
     const connection = await this.db.stats()
     const status = connection.ok
     const existing = await this.collection.findOne({ name: 'mongoConnected' })
-    if (existing) {
+    if (!existing) await this.collection.insertOne({ name: 'mongoConnected', status })
+    else
       await this.collection.updateOne(
         { name: 'mongoConnected' },
         {
@@ -43,9 +43,6 @@ export class HealthController {
         },
         { upsert: true }
       )
-    } else {
-      await this.collection.insertOne({ name: 'mongoConnected', status })
-    }
   }
 
   // async checkIpfsConnection(): Promise<any> {
@@ -72,7 +69,8 @@ export class HealthController {
       'Blockchain Info retrieved successfully.'
     )
     const existing = await this.collection.findOne({ name: 'blockchainInfo' })
-    if (existing) {
+    if (!existing) await this.collection.insertOne({ name: 'blockchainInfo', blockchainInfo })
+    else
       await this.collection.updateOne(
         { name: 'blockchainInfo' },
         {
@@ -82,9 +80,6 @@ export class HealthController {
         },
         { upsert: true }
       )
-    } else {
-      await this.collection.insertOne({ name: 'blockchainInfo', blockchainInfo })
-    }
   }
 
   async getWalletInfo(): Promise<void> {
@@ -99,7 +94,8 @@ export class HealthController {
       'Bitcoin walletInfo retrieved successfully.'
     )
     const existing = await this.collection.findOne({ name: 'walletInfo' })
-    if (existing) {
+    if (!existing) await this.collection.insertOne({ name: 'walletInfo', walletInfo })
+    else
       await this.collection.updateOne(
         { name: 'walletInfo' },
         {
@@ -109,9 +105,6 @@ export class HealthController {
         },
         { upsert: true }
       )
-    } else {
-      await this.collection.insertOne({ name: 'walletInfo', walletInfo })
-    }
   }
 
   async getNetworkInfo(): Promise<void> {
@@ -133,7 +126,8 @@ export class HealthController {
       'Bitcoin network info retrieved successfully.'
     )
     const existing = await this.collection.findOne({ name: 'networkInfo' })
-    if (existing) {
+    if (!existing) await this.collection.insertOne({ name: 'networkInfo', networkInfo })
+    else
       await this.collection.updateOne(
         { name: 'networkInfo' },
         {
@@ -143,20 +137,35 @@ export class HealthController {
         },
         { upsert: true }
       )
-    } else {
-      await this.collection.insertOne({ name: 'networkInfo', networkInfo })
-    }
   }
 
-  async upsertIPFSFailure(ipfsHashFailures: ReadonlyArray<IPFSHashFailure>) {
+  async updateIPFSFailure(ipfsHashFailures: ReadonlyArray<IPFSHashFailure>) {
     this.logger.debug({ ipfsHashFailures }, 'Upserting Claims by IPFS Hash')
+    const existing = await this.collection.findOne({ name: 'ipfsHashFailures' })
     await Promise.all(
       ipfsHashFailures.map(({ failureReason, failureType, ipfsFileHash }) => {
-        const existing = this.collection.find({ name: 'ipfsHashFailures' })
-        if (existing) this.collection.updateOne({ 'ipfsHashFailures.ipfsFileHashes.ipfsFileHash': ipfsFileHash }, { $set: { 'ipfsHashFailures.ipfsFileHashes.$.failureType' : failureType, 'ipfsHashFailures.ipfsFileHashes.$.failureReason': failureReason } }, { upsert: true })
-        else this.collection.insertOne({ name: 'ipfsHashFailures', ipfsHashFailures: { 'ipfsFileHashes': [{ipfsFileHash, failureReason, failureType}] } })
-      }
-      )
+        // if (!existing)
+          this.collection.insertOne({
+            name: 'ipfsHashFailures',
+            ipfsHashFailures: [{ ipfsFileHash, failureReason, failureType }],
+          })
+        // else {
+        //   const hashExisting = this.collection.findOne({
+        //     name: 'ipfsHashFailures',
+        //     'ipfsHashFailures.ipfsFileHash': ipfsFileHash,
+        //   })
+        //   if (!hashExisting)
+        //     this.collection.updateOne(
+        //       { name: 'ipfsHashFailures' },
+        //       { $push: { ipfsHashFailures: { ipfsFileHash, failureReason, failureType } } }
+        //     )
+        //   else
+        //     this.collection.updateOne(
+        //       { name: 'ipfsHashFailures', 'ipfsHashFailures.ipfsFileHash': ipfsFileHash },
+        //       { $set: { 'ipfsHashFailures.$': { ipfsFileHash, failureReason, failureType } } }
+        //     )
+        // }
+      })
     )
   }
 }
