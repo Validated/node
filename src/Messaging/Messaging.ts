@@ -91,8 +91,8 @@ export class Messaging {
     return this.publish(this.exchanges.claimsDownloaded, claimIPFSHashPairs)
   }
 
-  publishClaimsNotDownloaded = async (claimIPFSHashFailure: ReadonlyArray<IPFSHashFailure>) => {
-    return this.publish(this.exchanges.claimsNotDownloaded, claimIPFSHashFailure)
+  publishClaimsNotDownloaded = async (IPFSHashFailure: ReadonlyArray<IPFSHashFailure>) => {
+    return this.publish(this.exchanges.claimsNotDownloaded, IPFSHashFailure)
   }
 
   consumeClaimsDownloaded = async (consume: (claimIPFSHashPairs: ReadonlyArray<ClaimIPFSHashPair>) => void) => {

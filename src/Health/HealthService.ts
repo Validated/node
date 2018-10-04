@@ -6,6 +6,7 @@ import { childWithFileName } from 'Helpers/Logging'
 import { IPFSHashFailure } from 'Interfaces'
 import { Messaging } from 'Messaging/Messaging'
 
+import { ExchangeConfiguration } from './ExchangeConfiguration'
 import { HealthController } from './HealthController'
 import { HealthServiceConfiguration } from './HealthServiceConfiguration'
 
@@ -16,17 +17,20 @@ export class HealthService {
   private readonly configuration: HealthServiceConfiguration
   private readonly messaging: Messaging
   private readonly interval: Interval
+  private readonly exchange: ExchangeConfiguration
 
   constructor(
     @inject('Logger') logger: Pino.Logger,
     @inject('HealthController') controller: HealthController,
     @inject('Messaging') messaging: Messaging,
+    @inject('ExchangeConfiguration') exchange: ExchangeConfiguration,
     @inject('HealthServiceConfiguration') configuration: HealthServiceConfiguration
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.controller = controller
     this.configuration = configuration
     this.messaging = messaging
+    this.exchange = exchange
     this.interval = new Interval(this.getHealth, this.configuration.healthIntervalInSeconds * 1000)
   }
 
@@ -45,9 +49,9 @@ export class HealthService {
 
     logger.trace({ ipfsHashFailures }, 'IPFS Download Failure')
     try {
-      await this.controller.updateIPFSFailure(ipfsHashFailures)
+      await this.controller.insertIPFSFailures(ipfsHashFailures)
     } catch (error) {
-      logger.error({ error }, 'Failed to upsert ipfsHashFailures on health')
+      logger.error({ error }, 'Failed to update ipfsHashFailures on health')
     }
   }
 

@@ -6,6 +6,7 @@ import * as Pino from 'pino'
 import { createModuleLogger } from 'Helpers/Logging'
 import { Messaging } from 'Messaging/Messaging'
 
+import { ExchangeConfiguration } from './ExchangeConfiguration'
 import { HealthConfiguration } from './HealthConfiguration'
 import { HealthController } from './HealthController'
 import { HealthService } from './HealthService'
@@ -73,5 +74,6 @@ export class Health {
     this.container.bind<HealthServiceConfiguration>('HealthServiceConfiguration').toConstantValue({
       healthIntervalInSeconds: this.configuration.healthIntervalInSeconds,
     })
+    this.container.bind<ExchangeConfiguration>('ExchangeConfiguration').toConstantValue(this.configuration.exchanges)
   }
 }

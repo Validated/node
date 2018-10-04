@@ -20,6 +20,7 @@ export interface IPFSHashFailure {
   readonly ipfsFileHash: string
   readonly failureType: string
   readonly failureReason: string
+  readonly failureTime: number
 }
 const hasFailureType = has('failureType')
 const hasFailureReason = has('failureReason')
