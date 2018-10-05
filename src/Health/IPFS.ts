@@ -3,7 +3,7 @@ import fetch from 'node-fetch'
 
 import { IPFSConfiguration } from './IPFSConfiguration'
 
-type checkHealth = () => Promise<string>
+type checkHealth = () => Promise<number>
 
 @injectable()
 export class IPFS {
@@ -14,7 +14,6 @@ export class IPFS {
   }
   checkHealth: checkHealth = async () => {
     const response = await fetch(`${this.url}/api/v0/version`)
-    const json = await response.json()
-    return json
+    return response.status
   }
 }

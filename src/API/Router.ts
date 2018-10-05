@@ -98,17 +98,25 @@ export class Router {
   private getHealth = async (context: KoaRouter.IRouterContext, next: () => Promise<any>) => {
     const {
       mongoIsConnected,
+      ipfsIsConnected,
       blockchainInfo,
       walletInfo,
       networkInfo,
       ipfsDownloadRetries,
+      hardIpfsFailures,
+      ipfsFailureWillRetry,
+      ipfsFailureMaxRetries,
     } = await this.healthController.getHealth()
     context.body = {
       mongoIsConnected,
+      ipfsIsConnected,
       blockchainInfo,
       walletInfo,
       networkInfo,
       ipfsDownloadRetries,
+      hardIpfsFailures,
+      ipfsFailureWillRetry,
+      ipfsFailureMaxRetries 
     }
   }
 

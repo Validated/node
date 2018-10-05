@@ -11,6 +11,7 @@ import { HealthController } from './HealthController'
 import { Router } from './Router'
 import { RouterConfiguration } from './RouterConfiguration'
 import { WorkController } from './WorkController'
+import { HealthControllerConfiguration } from './HealthControllerConfiguration';
 
 @injectable()
 export class API {
@@ -59,6 +60,9 @@ export class API {
     this.container.bind<RouterConfiguration>('RouterConfiguration').toConstantValue({ port: this.configuration.port })
     this.container.bind<WorkController>('WorkController').to(WorkController)
     this.container.bind<HealthController>('HealthController').to(HealthController)
+    this.container.bind<HealthControllerConfiguration>('HealthControllerConfiguration').toConstantValue({
+      downloadMaxAttempts: this.configuration.downloadMaxAttempts,
+    })
     this.container.bind<Messaging>('Messaging').toConstantValue(this.messaging)
     this.container.bind<ExchangeConfiguration>('ExchangeConfiguration').toConstantValue(this.configuration.exchanges)
   }

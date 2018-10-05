@@ -11,6 +11,8 @@ import { HealthConfiguration } from './HealthConfiguration'
 import { HealthController } from './HealthController'
 import { HealthService } from './HealthService'
 import { HealthServiceConfiguration } from './HealthServiceConfiguration'
+import { IPFS } from './IPFS'
+import { IPFSConfiguration } from './IPFSConfiguration'
 import { Router } from './Router'
 
 export class Health {
@@ -61,6 +63,10 @@ export class Health {
     this.container.bind<HealthService>('Cron').to(HealthService)
     this.container.bind<HealthController>('HealthController').to(HealthController)
     this.container.bind<Messaging>('Messaging').toConstantValue(this.messaging)
+    this.container.bind<IPFS>('IPFS').to(IPFS)
+    this.container.bind<IPFSConfiguration>('IPFSConfiguration').toConstantValue({
+      ipfsUrl: this.configuration.ipfsUrl,
+    })
     this.container.bind<Router>('Router').to(Router)
     this.container.bind<BitcoinCore>('BitcoinCore').toConstantValue(
       new BitcoinCore({

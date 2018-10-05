@@ -37,6 +37,7 @@ export class HealthService {
 
   private getHealth = async (): Promise<any> => {
     await this.controller.checkMongoConnection()
+    await this.controller.checkIpfsConnection()
     await this.controller.getBlockchainInfo()
     await this.controller.getWalletInfo()
     await this.controller.getNetworkInfo()
