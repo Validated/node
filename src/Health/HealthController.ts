@@ -10,13 +10,11 @@ import { IPFSHashFailure } from 'Interfaces'
 export class HealthController {
   private readonly db: Db
   private readonly collection: Collection
-  // private readonly ipfs: IPFS
   private readonly bitcoinCore: BitcoinCore
   private readonly logger: Pino.Logger
 
   constructor(
     @inject('Logger') logger: Pino.Logger,
-    // @inject('IPFS') ipfs: IPFS,
     @inject('DB') db: Db,
     @inject('BitcoinCore') bitcoinCore: BitcoinCore
   ) {
@@ -24,7 +22,6 @@ export class HealthController {
     this.db = db
     this.collection = this.db.collection('health')
     this.bitcoinCore = bitcoinCore
-    // this.ipfs = ipfs
   }
 
   async checkMongoConnection(): Promise<any> {
@@ -141,18 +138,23 @@ export class HealthController {
 
   async updateIPFSFailures(ipfsHashFailures: ReadonlyArray<IPFSHashFailure>) {
     this.logger.debug({ ipfsHashFailures }, 'Updating IPFS Failures by IPFS Hash')
-    await Promise.all(
+    const ipfsHashFailuresHashExisting = await Promise.all(
       ipfsHashFailures.map(async ({ ipfsFileHash, failureType, failureReason, failureTime }) => {
-        const hashExisting = this.collection.findOne({
+        const existing = await this.collection.findOne({
           name: 'ipfsDownloadRetries',
           'ipfsDownloadRetries.ipfsFileHash': ipfsFileHash,
         })
-        if (!hashExisting)
-          await this.collection.updateOne(
+        const hashExisting = existing ? true : false
+        return { ipfsFileHash, failureType, failureReason, failureTime, hashExisting }
+      }))
+    await Promise.all(
+      ipfsHashFailuresHashExisting.map(({ ipfsFileHash, failureReason, failureType, failureTime, hashExisting }) => {
+        if (!hashExisting) 
+          this.collection.updateOne(
             { name: 'ipfsDownloadRetries' },
             {
               $push: {
-                ipfsHashFailures: {
+                ipfsDownloadRetries: {
                   ipfsFileHash,
                   failureReason,
                   failureType,
@@ -163,11 +165,11 @@ export class HealthController {
             }
           )
         else
-          await this.collection.updateOne(
+          this.collection.updateOne(
             { name: 'ipfsDownloadRetries', 'ipfsDownloadRetries.ipfsFileHash': ipfsFileHash },
             {
               $set: {
-                'ipfsDownloadRetries.$.failureReason': failureReason,
+                'ipfsDownloadRetries.$npm ru.failureReason': failureReason,
                 'ipfsDownloadRetries.$.failureType': failureType,
                 'ipfsDownloadRetries.$.lastDownloadAttemptTime': failureTime,
               },
@@ -179,11 +181,10 @@ export class HealthController {
     return ipfsHashFailures
   }
 
-  async insertIPFSFailures(ipfsHashFailures: ReadonlyArray<IPFSHashFailure>) {
+  async upsertIPFSFailures(ipfsHashFailures: ReadonlyArray<IPFSHashFailure>) {
     this.logger.debug({ ipfsHashFailures }, 'Inserting IPFS Failures')
-    console.log('IPFS HASH FAILURES', ipfsHashFailures)
     const existing = await this.collection.findOne({ name: 'ipfsDownloadRetries' })
-    if (!existing) 
+    if (!existing) {
       await Promise.all(
         ipfsHashFailures.map(({ failureReason, failureType, ipfsFileHash, failureTime }) => {
           this.collection.insertOne({
@@ -194,6 +195,7 @@ export class HealthController {
           })
         })
       )
+    }
     else await this.updateIPFSFailures(ipfsHashFailures)
     return ipfsHashFailures
   }

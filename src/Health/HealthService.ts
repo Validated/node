@@ -3,10 +3,7 @@ import { injectable, inject } from 'inversify'
 import * as Pino from 'pino'
 
 import { childWithFileName } from 'Helpers/Logging'
-import { IPFSHashFailure } from 'Interfaces'
-import { Messaging } from 'Messaging/Messaging'
 
-import { ExchangeConfiguration } from './ExchangeConfiguration'
 import { HealthController } from './HealthController'
 import { HealthServiceConfiguration } from './HealthServiceConfiguration'
 
@@ -15,22 +12,16 @@ export class HealthService {
   private readonly logger: Pino.Logger
   private readonly controller: HealthController
   private readonly configuration: HealthServiceConfiguration
-  private readonly messaging: Messaging
   private readonly interval: Interval
-  private readonly exchange: ExchangeConfiguration
 
   constructor(
     @inject('Logger') logger: Pino.Logger,
     @inject('HealthController') controller: HealthController,
-    @inject('Messaging') messaging: Messaging,
-    @inject('ExchangeConfiguration') exchange: ExchangeConfiguration,
     @inject('HealthServiceConfiguration') configuration: HealthServiceConfiguration
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.controller = controller
     this.configuration = configuration
-    this.messaging = messaging
-    this.exchange = exchange
     this.interval = new Interval(this.getHealth, this.configuration.healthIntervalInSeconds * 1000)
   }
 
@@ -44,22 +35,10 @@ export class HealthService {
     this.interval.stop()
   }
 
-  onClaimsNotDownloaded = async (ipfsHashFailures: ReadonlyArray<IPFSHashFailure>) => {
-    const logger = this.logger.child({ method: 'onClaimsNotDownloaded' })
-
-    logger.trace({ ipfsHashFailures }, 'IPFS Download Failure')
-    try {
-      await this.controller.insertIPFSFailures(ipfsHashFailures)
-    } catch (error) {
-      logger.error({ error }, 'Failed to update ipfsHashFailures on health')
-    }
-  }
-
   private getHealth = async (): Promise<any> => {
     await this.controller.checkMongoConnection()
     await this.controller.getBlockchainInfo()
     await this.controller.getWalletInfo()
     await this.controller.getNetworkInfo()
-    await this.messaging.consumeClaimsNotDownloaded(this.onClaimsNotDownloaded)
   }
 }

@@ -1,5 +1,5 @@
 import BitcoinCore = require('bitcoin-core')
-import { injectable, Container } from 'inversify'
+import { Container } from 'inversify'
 import { Db, MongoClient } from 'mongodb'
 import * as Pino from 'pino'
 
@@ -11,10 +11,8 @@ import { HealthConfiguration } from './HealthConfiguration'
 import { HealthController } from './HealthController'
 import { HealthService } from './HealthService'
 import { HealthServiceConfiguration } from './HealthServiceConfiguration'
-// import { IPFS } from './IPFS'
-// import { IPFSConfiguration } from './IPFSConfiguration'
+import { Router } from './Router'
 
-@injectable()
 export class Health {
   private readonly logger: Pino.Logger
   private readonly configuration: HealthConfiguration
@@ -23,6 +21,7 @@ export class Health {
   private dbConnection: Db
   private cron: HealthService
   private messaging: Messaging
+  private router: Router
 
   constructor(configuration: HealthConfiguration) {
     this.configuration = configuration
@@ -33,12 +32,15 @@ export class Health {
     this.logger.info({ configuration: this.configuration }, 'Health Starting')
     this.mongoClient = await MongoClient.connect(this.configuration.dbUrl)
     this.dbConnection = await this.mongoClient.db()
+    
     this.messaging = new Messaging(this.configuration.rabbitmqUrl, this.configuration.exchanges)
-
     await this.messaging.start()
 
     this.initializeContainer()
 
+    this.router = this.container.get('Router')
+    await this.router.start()
+    
     this.cron = this.container.get('Cron')
     await this.cron.start()
 
@@ -47,6 +49,7 @@ export class Health {
 
   async stop() {
     this.logger.info('Stopping Health...')
+    await this.router.stop()
     await this.cron.stop()
     this.logger.info('Stopping Health Database...')
     await this.mongoClient.close()
@@ -57,11 +60,8 @@ export class Health {
     this.container.bind<Db>('DB').toConstantValue(this.dbConnection)
     this.container.bind<HealthService>('Cron').to(HealthService)
     this.container.bind<HealthController>('HealthController').to(HealthController)
-    // this.container.bind<IPFS>('IFPS').to(IPFS)
-    // this.container.bind<IPFSConfiguration>('IPFSConfiguration').toConstantValue({
-    //   ipfsUrl: this.configuration.ipfsUrl,
-    // })
     this.container.bind<Messaging>('Messaging').toConstantValue(this.messaging)
+    this.container.bind<Router>('Router').to(Router)
     this.container.bind<BitcoinCore>('BitcoinCore').toConstantValue(
       new BitcoinCore({
         host: this.configuration.bitcoinUrl,

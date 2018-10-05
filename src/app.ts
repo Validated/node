@@ -228,7 +228,6 @@ export async function app(localVars: any = {}) {
     bitcoinNetwork: configuration.bitcoinNetwork,
     bitcoinUsername: configuration.bitcoinUsername,
     bitcoinPassword: configuration.bitcoinPassword,
-    ipfsUrl: configuration.ipfsUrl,
     healthIntervalInSeconds: configuration.healthIntervalInSeconds,
     exchanges: {
       claimsNotDownloaded: configuration.exchangeClaimsNotDownloaded,

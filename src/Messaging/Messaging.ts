@@ -144,7 +144,6 @@ export class Messaging {
         })
         return
       }
-
       consume(IPFSHashFailure)
     })
   }

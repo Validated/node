@@ -12,18 +12,18 @@ export class HealthController {
   }
 
   async getHealth(): Promise<any> {
-    const connection = await this.collection.findOne({ name: 'mongoConnected' })
-    const { blockchainInfo } = await this.collection.findOne({ name: 'blockchainInfo' })
-    const { walletInfo } = await this.collection.findOne({ name: 'walletInfo' })
-    const { networkInfo } = await this.collection.findOne({ name: 'networkInfo' })
-    const ipfsHashFailures = await this.collection.findOne({ name: 'ipfsDownloadRetries' })
-    const isConnected = connection.status === 1 ? true : false
+    const { status } = await this.collection.findOne({ name: 'mongoConnected' }) || { status: 2 }
+    const mongoIsConnected = status === 1 ? true : status === 2 ? 'Getting MongoDb Connection Status...' : false;
+    const { blockchainInfo } = await this.collection.findOne({ name: 'blockchainInfo' }) || { blockchainInfo: 'Getting Blockchain Info...'}
+    const { walletInfo } = await this.collection.findOne({ name: 'walletInfo' }) || { walletInfo : 'Getting Wallet Info...'}
+    const { networkInfo } = await this.collection.findOne({ name: 'networkInfo' }) || { networkInfo: 'Getting Network Info...'}
+    const { ipfsDownloadRetries } = await this.collection.findOne({ name: 'ipfsDownloadRetries' }) || { ipfsDownloadRetries: 'No IFPS Download Retries'}
     return {
-      isConnected,
+      mongoIsConnected,
       blockchainInfo,
       walletInfo,
       networkInfo,
-      ipfsHashFailures,
+      ipfsDownloadRetries,
     }
   }
 }
