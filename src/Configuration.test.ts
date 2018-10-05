@@ -87,6 +87,8 @@ describe('loadConfigurationWithDefaults', async (should: any) => {
   const { assert } = should()
   const mongodbOverrides = {
     API_PORT: '4321',
+    ENABLE_TIMESTAMPING: 'true',
+    RABBITMQ_URL: 'foo',
   }
 
   const withoutLocalOverrides = loadConfigurationWithDefaults()
@@ -98,8 +100,37 @@ describe('loadConfigurationWithDefaults', async (should: any) => {
     expected: {
       ...withoutLocalOverrides,
       apiPort: 4321,
+      enableTimestamping: true,
+      rabbitmqUrl: 'foo',
     },
   })
+
+  {
+    const overrideValues = {
+      EXCHANGE_PREFIX: 'myPrefix',
+    }
+
+    const expected = {
+      exchangeBatchReaderReadNextDirectoryRequest: 'myPrefix.BATCH_READER::READ_NEXT_DIRECTORY_REQUEST',
+      exchangeBatchReaderReadNextDirectorySuccess: 'myPrefix.BATCH_READER::READ_NEXT_DIRECTORY_SUCCESS',
+      exchangeBatchWriterCreateNextBatchRequest: 'myPrefix.BATCH_WRITER::CREATE_NEXT_BATCH_REQUEST',
+      exchangeBatchWriterCreateNextBatchSuccess: 'myPrefix.BATCH_WRITER::CREATE_NEXT_BATCH_SUCCESS',
+      exchangeNewClaim: 'myPrefix.NEW_CLAIM',
+      exchangeClaimIpfsHash: 'myPrefix.CLAIM_IPFS_HASH',
+      exchangeIpfsHashTxId: 'myPrefix.IPFS_HASH_TX_ID',
+      exchangePoetAnchorDownloaded: 'myPrefix.POET_ANCHOR_DOWNLOADED',
+      exchangeClaimsDownloaded: 'myPrefix.CLAIMS_DOWNLOADED',
+    }
+    const keys = Object.keys(expected)
+    const actual = pick(keys, loadConfigurationWithDefaults(overrideValues))
+
+    assert({
+      given: 'override default values with an EXCHANGE_PREFIX',
+      should: 'return exchange names with the prefix prepended',
+      actual,
+      expected,
+    })
+  }
 })
 
 describe('src/Configuration RabbitmqExchangeMessages', async (should: any) => {

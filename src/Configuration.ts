@@ -4,7 +4,7 @@ import * as assert from 'assert'
 import { readFileSync, existsSync } from 'fs'
 import { homedir } from 'os'
 import * as path from 'path'
-import { keys } from 'ramda'
+import { keys, pipe } from 'ramda'
 
 import { createEnvToConfigurationKeyMap } from 'Helpers/Configuration'
 
@@ -13,6 +13,7 @@ const defaultMongodbUrl = 'mongodb://localhost:27017/poet'
 // Provide default value in defaultConfiguration for any new configuration options
 export interface Configuration extends LoggingConfiguration, BitcoinRPCConfiguration, ExchangeConfiguration {
   readonly rabbitmqUrl: string
+  readonly exchangePrefix: string
   readonly mongodbUser: string
   readonly mongodbPassword: string
   readonly mongodbHost: string
@@ -42,6 +43,9 @@ export interface Configuration extends LoggingConfiguration, BitcoinRPCConfigura
   readonly batchCreationIntervalInSeconds: number
 
   readonly readDirectoryIntervalInSeconds: number
+
+  readonly uploadClaimIntervalInSeconds: number
+  readonly uploadClaimMaxAttempts: number
 }
 
 export interface LoggingConfiguration {
@@ -68,10 +72,12 @@ export interface ExchangeConfiguration {
   readonly exchangePoetAnchorDownloaded: string
   readonly exchangeClaimsDownloaded: string
   readonly exchangeClaimsNotDownloaded: string
+  readonly exchangeStorageWriterStoreNextClaim: string
 }
 
 const defaultConfiguration: Configuration = {
   rabbitmqUrl: 'amqp://localhost',
+  exchangePrefix: '',
   mongodbUser: '',
   mongodbPassword: '',
   mongodbHost: 'localhost',
@@ -108,6 +114,9 @@ const defaultConfiguration: Configuration = {
 
   readDirectoryIntervalInSeconds: 30,
 
+  uploadClaimIntervalInSeconds: 30,
+  uploadClaimMaxAttempts: 10,
+
   forceBlockHeight: undefined,
 
   exchangeBatchReaderReadNextDirectoryRequest: 'BATCH_READER::READ_NEXT_DIRECTORY_REQUEST',
@@ -120,6 +129,7 @@ const defaultConfiguration: Configuration = {
   exchangePoetAnchorDownloaded: 'POET_ANCHOR_DOWNLOADED',
   exchangeClaimsDownloaded: 'CLAIMS_DOWNLOADED',
   exchangeClaimsNotDownloaded: 'CLAIMS_NOT_DOWNLOADED',
+  exchangeStorageWriterStoreNextClaim: 'STORAGE_WRITER::STORE_NEXT_CLAIM',
 }
 
 export const configurationPath = () => path.join(homedir(), '/.po.et/configuration.json')
@@ -140,7 +150,37 @@ export const mergeConfigs = (localVars: any = {}) => {
   return config
 }
 
-export const loadConfigurationWithDefaults = (localVars: any = {}) => mergeConfigs({ ...process.env, ...localVars })
+const prependPrefix = (prefix: string, configVars: any) => (acc: any, k: string) => ({
+  ...acc,
+  [k]: `${prefix}.${configVars[k]}`,
+})
+
+const applyExchangePrefix = (configVars: any) => {
+  if (configVars.exchangePrefix === '') return configVars
+
+  const exchangeNames = [
+    'exchangeBatchReaderReadNextDirectoryRequest',
+    'exchangeBatchReaderReadNextDirectorySuccess',
+    'exchangeBatchWriterCreateNextBatchRequest',
+    'exchangeBatchWriterCreateNextBatchSuccess',
+    'exchangeNewClaim',
+    'exchangeClaimIpfsHash',
+    'exchangeIpfsHashTxId',
+    'exchangePoetAnchorDownloaded',
+    'exchangeClaimsDownloaded',
+  ]
+
+  return {
+    ...configVars,
+    ...exchangeNames.reduce(prependPrefix(configVars.exchangePrefix, configVars), {}),
+  }
+}
+
+export const loadConfigurationWithDefaults = (localVars: any = {}) =>
+  pipe(
+    mergeConfigs,
+    applyExchangePrefix
+  )({ ...process.env, ...localVars })
 
 function loadConfigurationFromFile(configPath: string): Configuration | {} {
   if (!existsSync(configPath)) {
@@ -159,6 +199,16 @@ function loadConfigurationFromFile(configPath: string): Configuration | {} {
   return configuration
 }
 
+const extractValue = (value: any) => {
+  const coercedValue = value === 'true' ? true : value === 'false' ? false : value
+
+  return isNaN(coercedValue)
+    ? coercedValue
+    : typeof coercedValue === 'boolean'
+      ? coercedValue
+      : parseInt(coercedValue, 10)
+}
+
 function loadConfigurationFromEnv(env: any): Partial<Configuration> {
   const map = createEnvToConfigurationKeyMap(keys(defaultConfiguration))
 
@@ -167,7 +217,7 @@ function loadConfigurationFromEnv(env: any): Partial<Configuration> {
     .reduce(
       (previousValue, [key, value]: [string, any]) => ({
         ...previousValue,
-        [map[key]]: isNaN(value) ? value : parseInt(value, 10),
+        [map[key]]: extractValue(value),
       }),
       {}
     )
