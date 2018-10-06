@@ -5,10 +5,10 @@ import { describe } from 'riteway'
 
 import { ExchangeConfiguration } from './ExchangeConfiguration'
 import { HealthController } from './HealthController'
+import { HealthControllerConfiguration } from './HealthControllerConfiguration'
 import { Router } from './Router'
 import { RouterConfiguration } from './RouterConfiguration'
 import { WorkController } from './WorkController'
-import { HealthControllerConfiguration } from './HealthControllerConfiguration'
 
 describe('API Router', async (should: any) => {
   const { assert } = should('')
@@ -20,7 +20,7 @@ describe('API Router', async (should: any) => {
   const host = 'http://localhost'
   const port = 3000
   const server = new Server(host, port)
-  const healthController = new HealthController(new Db('poet', server), healthControllerConfiguration )
+  const healthController = new HealthController(new Db('poet', server), healthControllerConfiguration)
   const exchangeConfiguration: ExchangeConfiguration = {
     poetAnchorDownloaded: '',
     claimsDownloaded: '',
