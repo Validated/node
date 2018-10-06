@@ -150,35 +150,37 @@ export class HealthController {
       })
     )
     await Promise.all(
-      ipfsHashFailuresHashExisting.map(({ ipfsFileHash, failureReason, failureType, failureTime, hashExisting }) => {
-        if (!hashExisting)
-          this.collection.updateOne(
-            { name: 'ipfsDownloadRetries' },
-            {
-              $push: {
-                ipfsDownloadRetries: {
-                  ipfsFileHash,
-                  failureReason,
-                  failureType,
-                  lastDownloadAttemptTime: failureTime,
-                  downloadAttempts: 1,
+      ipfsHashFailuresHashExisting.map(
+        async ({ ipfsFileHash, failureReason, failureType, failureTime, hashExisting }) => {
+          if (!hashExisting)
+            await this.collection.updateOne(
+              { name: 'ipfsDownloadRetries' },
+              {
+                $push: {
+                  ipfsDownloadRetries: {
+                    ipfsFileHash,
+                    failureReason,
+                    failureType,
+                    lastDownloadAttemptTime: failureTime,
+                    downloadAttempts: 1,
+                  },
                 },
-              },
-            }
-          )
-        else
-          this.collection.updateOne(
-            { name: 'ipfsDownloadRetries', 'ipfsDownloadRetries.ipfsFileHash': ipfsFileHash },
-            {
-              $set: {
-                'ipfsDownloadRetries.$npm ru.failureReason': failureReason,
-                'ipfsDownloadRetries.$.failureType': failureType,
-                'ipfsDownloadRetries.$.lastDownloadAttemptTime': failureTime,
-              },
-              $inc: { 'ipfsDownloadRetries.$.downloadAttempts': 1 },
-            }
-          )
-      })
+              }
+            )
+          else
+            await this.collection.updateOne(
+              { name: 'ipfsDownloadRetries', 'ipfsDownloadRetries.ipfsFileHash': ipfsFileHash },
+              {
+                $set: {
+                  'ipfsDownloadRetries.$npm ru.failureReason': failureReason,
+                  'ipfsDownloadRetries.$.failureType': failureType,
+                  'ipfsDownloadRetries.$.lastDownloadAttemptTime': failureTime,
+                },
+                $inc: { 'ipfsDownloadRetries.$.downloadAttempts': 1 },
+              }
+            )
+        }
+      )
     )
     return ipfsHashFailures
   }
@@ -188,8 +190,8 @@ export class HealthController {
     const existing = await this.collection.findOne({ name: 'ipfsDownloadRetries' })
     if (!existing)
       await Promise.all(
-        ipfsHashFailures.map(({ failureReason, failureType, ipfsFileHash, failureTime }) => {
-          this.collection.insertOne({
+        ipfsHashFailures.map(async ({ failureReason, failureType, ipfsFileHash, failureTime }) => {
+          await this.collection.insertOne({
             name: 'ipfsDownloadRetries',
             ipfsDownloadRetries: [
               { ipfsFileHash, failureReason, failureType, lastDownloadAttemptTime: failureTime, downloadAttempts: 1 },
