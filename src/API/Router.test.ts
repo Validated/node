@@ -8,15 +8,19 @@ import { HealthController } from './HealthController'
 import { Router } from './Router'
 import { RouterConfiguration } from './RouterConfiguration'
 import { WorkController } from './WorkController'
+import { HealthControllerConfiguration } from './HealthControllerConfiguration'
 
 describe('API Router', async (should: any) => {
   const { assert } = should('')
 
   const configuration = { port: 3000 } as RouterConfiguration
+  const healthControllerConfiguration: HealthControllerConfiguration = {
+    downloadMaxAttempts: 1,
+  }
   const host = 'http://localhost'
   const port = 3000
   const server = new Server(host, port)
-  const healthController = new HealthController(new Db('poet', server))
+  const healthController = new HealthController(new Db('poet', server), healthControllerConfiguration )
   const exchangeConfiguration: ExchangeConfiguration = {
     poetAnchorDownloaded: '',
     claimsDownloaded: '',
