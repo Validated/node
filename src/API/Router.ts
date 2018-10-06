@@ -116,7 +116,7 @@ export class Router {
       ipfsDownloadRetries,
       hardIpfsFailures,
       ipfsFailureWillRetry,
-      ipfsFailureMaxRetries 
+      ipfsFailureMaxRetries,
     }
   }
 

@@ -54,9 +54,9 @@ export async function app(localVars: any = {}) {
     exchanges: {
       poetAnchorDownloaded: configuration.exchangePoetAnchorDownloaded,
       claimsDownloaded: configuration.exchangeClaimsDownloaded,
-      newClaim: configuration.exchangeNewClaim
-    }
-  });
+      newClaim: configuration.exchangeNewClaim,
+    },
+  })
 
   try {
     await api.start()

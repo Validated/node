@@ -147,10 +147,11 @@ export class HealthController {
         })
         const hashExisting = existing ? true : false
         return { ipfsFileHash, failureType, failureReason, failureTime, hashExisting }
-      }))
+      })
+    )
     await Promise.all(
       ipfsHashFailuresHashExisting.map(({ ipfsFileHash, failureReason, failureType, failureTime, hashExisting }) => {
-        if (!hashExisting) 
+        if (!hashExisting)
           this.collection.updateOne(
             { name: 'ipfsDownloadRetries' },
             {
@@ -174,7 +175,7 @@ export class HealthController {
                 'ipfsDownloadRetries.$.failureType': failureType,
                 'ipfsDownloadRetries.$.lastDownloadAttemptTime': failureTime,
               },
-              $inc: { 'ipfsDownloadRetries.$.downloadAttempts': 1 }
+              $inc: { 'ipfsDownloadRetries.$.downloadAttempts': 1 },
             }
           )
       })
@@ -185,7 +186,7 @@ export class HealthController {
   async upsertIPFSFailures(ipfsHashFailures: ReadonlyArray<IPFSHashFailure>) {
     this.logger.debug({ ipfsHashFailures }, 'Inserting IPFS Failures')
     const existing = await this.collection.findOne({ name: 'ipfsDownloadRetries' })
-    if (!existing) {
+    if (!existing) 
       await Promise.all(
         ipfsHashFailures.map(({ failureReason, failureType, ipfsFileHash, failureTime }) => {
           this.collection.insertOne({
@@ -196,7 +197,6 @@ export class HealthController {
           })
         })
       )
-    }
     else await this.updateIPFSFailures(ipfsHashFailures)
     return ipfsHashFailures
   }

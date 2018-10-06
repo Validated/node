@@ -13,4 +13,3 @@ export interface HealthConfiguration
   readonly rabbitmqUrl: string
   readonly exchanges: ExchangeConfiguration
 }
-

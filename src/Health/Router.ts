@@ -16,7 +16,7 @@ export class Router {
   constructor(
     @inject('Logger') logger: Pino.Logger,
     @inject('Messaging') messaging: Messaging,
-    @inject('HealthController') controller: HealthController,
+    @inject('HealthController') controller: HealthController
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.messaging = messaging
@@ -24,7 +24,7 @@ export class Router {
   }
 
   async start() {
-    await this.messaging.consumeClaimsNotDownloaded(this.onClaimsNotDownloaded);
+    await this.messaging.consumeClaimsNotDownloaded(this.onClaimsNotDownloaded)
   }
 
   async stop() {
@@ -32,7 +32,6 @@ export class Router {
     this.logger.info('Stopping Health Messaging...')
     await this.messaging.stop()
   }
-
 
   onClaimsNotDownloaded = async (ipfsHashFailures: ReadonlyArray<IPFSHashFailure>) => {
     const logger = this.logger.child({ method: 'onClaimsNotDownloaded' })
