@@ -248,7 +248,6 @@ export class ClaimController {
       }
     }
     const logger = this.logger.child({ method: 'downloadEntryClaim' })
-    throw new InvalidClaim(ipfsFileHash, FailureReason.InvalidJson, new Date().getTime())
 
     logger.trace({ ipfsFileHash }, 'Starting claim download')
 
