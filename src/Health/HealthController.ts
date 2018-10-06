@@ -186,7 +186,7 @@ export class HealthController {
   async upsertIPFSFailures(ipfsHashFailures: ReadonlyArray<IPFSHashFailure>) {
     this.logger.debug({ ipfsHashFailures }, 'Inserting IPFS Failures')
     const existing = await this.collection.findOne({ name: 'ipfsDownloadRetries' })
-    if (!existing) 
+    if (!existing)
       await Promise.all(
         ipfsHashFailures.map(({ failureReason, failureType, ipfsFileHash, failureTime }) => {
           this.collection.insertOne({
