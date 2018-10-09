@@ -10,9 +10,7 @@ import { Router } from './Router'
 import { RouterConfiguration } from './RouterConfiguration'
 import { WorkController } from './WorkController'
 
-describe('API Router', async (should: any) => {
-  const { assert } = should('')
-
+describe('API Router', async (assert: any) => {
   const configuration = { port: 3000 } as RouterConfiguration
   const healthControllerConfiguration: HealthControllerConfiguration = {
     downloadMaxAttempts: 1,
