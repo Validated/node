@@ -28,7 +28,6 @@ export class Router {
   }
 
   async stop() {
-    this.logger.info('Stopping Health Router...')
     this.logger.info('Stopping Health Messaging...')
     await this.messaging.stop()
   }

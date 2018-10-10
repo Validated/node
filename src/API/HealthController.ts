@@ -1,6 +1,8 @@
 import { inject, injectable } from 'inversify'
 import { Db, Collection } from 'mongodb'
+
 import { HealthControllerConfiguration } from './HealthControllerConfiguration'
+
 @injectable()
 export class HealthController {
   private readonly db: Db
@@ -17,9 +19,8 @@ export class HealthController {
   }
 
   async getHealth(): Promise<any> {
-    const { mongoIsConnected } = (await this.collection.findOne({ name: 'mongoConnected' })) || {
-      mongoIsConnected: 'Checking Mongo Connection...',
-    }
+    const connection = await this.db.stats();
+    const mongoIsConnected = connection.ok === 1
     const { ipfsIsConnected } = (await this.collection.findOne({ name: 'ipfsConnected' })) || {
       ipfsIsConnected: 'Checking IPFS Connection...',
     }

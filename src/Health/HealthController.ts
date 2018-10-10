@@ -28,25 +28,10 @@ export class HealthController {
     this.ipfs = ipfs
   }
 
-  async checkMongoConnection(): Promise<any> {
-    this.logger.trace('MongoHealth', 'Checking Mongo...')
-    const connection = await this.db.stats()
-    const mongoIsConnected = connection.ok === 1 ? true : false
-    await this.collection.updateOne(
-      { name: 'mongoConnected' },
-      {
-        $set: {
-          mongoIsConnected,
-        },
-      },
-      { upsert: true }
-    )
-  }
-
   async checkIpfsConnection(): Promise<any> {
-    this.logger.trace('ipfsHealth', 'Checking IPFS...')
+    this.logger.trace('Checking IPFS...')
     const connection = await this.ipfs.checkHealth()
-    const ipfsIsConnected = connection === 200 ? true : false
+    const ipfsIsConnected = connection === 200
     await this.collection.updateOne(
       { name: 'ipfsConnected' },
       {
@@ -67,7 +52,7 @@ export class HealthController {
       bestblockhash,
       warnings,
       size_on_disk,
-    } = await this.bitcoinCore.getBlockchainInfo().then((res: any) => res)
+    } = await this.bitcoinCore.getBlockchainInfo()
     const blockchainInfo = { blocks, verificationprogress, bestblockhash, warnings, size_on_disk }
     logger.trace(
       {
@@ -141,11 +126,10 @@ export class HealthController {
     this.logger.debug({ ipfsHashFailures }, 'Updating IPFS Failures by IPFS Hash')
     const ipfsHashFailuresHashExisting = await Promise.all(
       ipfsHashFailures.map(async ({ ipfsFileHash, failureType, failureReason, failureTime }) => {
-        const existing = await this.collection.findOne({
+        const hashExisting = await this.collection.findOne({
           name: 'ipfsDownloadRetries',
           'ipfsDownloadRetries.ipfsFileHash': ipfsFileHash,
         })
-        const hashExisting = existing ? true : false
         return { ipfsFileHash, failureType, failureReason, failureTime, hashExisting }
       })
     )
@@ -172,7 +156,7 @@ export class HealthController {
               { name: 'ipfsDownloadRetries', 'ipfsDownloadRetries.ipfsFileHash': ipfsFileHash },
               {
                 $set: {
-                  'ipfsDownloadRetries.$npm ru.failureReason': failureReason,
+                  'ipfsDownloadRetries.$.failureReason': failureReason,
                   'ipfsDownloadRetries.$.failureType': failureType,
                   'ipfsDownloadRetries.$.lastDownloadAttemptTime': failureTime,
                 },
