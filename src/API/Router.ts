@@ -18,6 +18,7 @@ import * as Pino from 'pino'
 
 import { childWithFileName } from 'Helpers/Logging'
 
+import { HealthController } from './HealthController'
 import { HttpExceptionsMiddleware } from './Middlewares/HttpExceptionsMiddleware'
 import { LoggerMiddleware } from './Middlewares/LoggerMiddleware'
 import { RequestValidationMiddleware } from './Middlewares/RequestValidationMiddleware'
@@ -32,6 +33,7 @@ export class Router {
   private readonly koa = new Koa()
   private readonly koaRouter = new KoaRouter()
   private readonly workController: WorkController
+  private readonly healthController: HealthController
   private server: http.Server
   private readonly verifiableClaimSigner: VerifiableClaimSigner
 
@@ -39,11 +41,13 @@ export class Router {
     @inject('Logger') logger: Pino.Logger,
     @inject('RouterConfiguration') configuration: RouterConfiguration,
     @inject('WorkController') workController: WorkController,
+    @inject('HealthController') healthController: HealthController
     @inject('VerifiableClaimSigner') verifiableClaimSigner: VerifiableClaimSigner
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.configuration = configuration
     this.workController = workController
+    this.healthController = healthController
     this.verifiableClaimSigner = verifiableClaimSigner
 
     const getWorkSchema = {
@@ -63,6 +67,7 @@ export class Router {
     this.koaRouter.get('/works/:id', RequestValidationMiddleware(getWorkSchema), this.getWork)
     this.koaRouter.get('/works', RequestValidationMiddleware(getWorksSchema), this.getWorks)
     this.koaRouter.post('/works', this.postWork)
+    this.koaRouter.get('/health', this.getHealth)
 
     this.koa.use(helmet(SecurityHeaders))
     this.koa.use(KoaCors({ expose: ['X-Total-Count'] }))
@@ -91,6 +96,10 @@ export class Router {
     if (!work) throw new NotFoundException('')
 
     context.body = work
+  }
+
+  private getHealth = async (context: KoaRouter.IRouterContext, next: () => Promise<any>) => {
+    context.body = await this.healthController.getHealth()
   }
 
   private getWorks = async (context: KoaRouter.IRouterContext, next: () => Promise<any>) => {

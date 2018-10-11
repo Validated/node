@@ -5,8 +5,7 @@ import { describe } from 'riteway'
 import { app } from '../../src/app'
 import { issuerACD, PrivateKeyACD } from '../../test/Claims'
 import { ensureBitcoinBalance } from '../helpers/bitcoin'
-import { dbHelper } from '../helpers/database'
-import { delay, runtimeId } from '../helpers/utils'
+import { delay, runtimeId, createDatabase } from '../helpers/utils'
 import { getWork, postWork } from '../helpers/works'
 const Client = require('bitcoin-core')
 
@@ -32,6 +31,7 @@ const blockchainSettings = {
   TIMESTAMP_INTERVAL_IN_SECONDS: 10,
   BATCH_CREATION_INTERVAL_IN_SECONDS: 5,
   READ_DIRECTORY_INTERVAL_IN_SECONDS: 5,
+  UPLOAD_CLAIM_INTERVAL_IN_SECONDS: 5,
 }
 
 const bitcoindClientA = new Client({
@@ -41,15 +41,6 @@ const bitcoindClientA = new Client({
   password: 'bitcoinrpcpassword',
   username: 'bitcoinrpcuser',
 })
-
-const createDatabase = async (prefix: string) => {
-  const db = dbHelper()
-
-  return {
-    teardown: db.teardown,
-    settings: await db.setup(prefix),
-  }
-}
 
 describe('A user can successfully submit a claim into the po.et network', async (assert: any) => {
   const dbA = await createDatabase(PREFIX_A)
