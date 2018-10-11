@@ -41,7 +41,7 @@ export class Router {
     @inject('Logger') logger: Pino.Logger,
     @inject('RouterConfiguration') configuration: RouterConfiguration,
     @inject('WorkController') workController: WorkController,
-    @inject('HealthController') healthController: HealthController
+    @inject('HealthController') healthController: HealthController,
     @inject('VerifiableClaimSigner') verifiableClaimSigner: VerifiableClaimSigner
   ) {
     this.logger = childWithFileName(logger, __filename)
