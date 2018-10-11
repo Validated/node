@@ -1,4 +1,9 @@
-import { Work, PoetBlockAnchor } from '@po.et/poet-js'
+import {
+  getVerifiableClaimSigner,
+  IllegalArgumentException,
+  PoetBlockAnchor,
+  SignedVerifiableClaim,
+} from '@po.et/poet-js'
 import { inject, injectable } from 'inversify'
 import { Collection, Db } from 'mongodb'
 import * as Pino from 'pino'
@@ -9,12 +14,12 @@ import { Messaging } from 'Messaging/Messaging'
 import { ExchangeConfiguration } from './ExchangeConfiguration'
 
 interface WorksFilters {
-  readonly publicKey?: string
+  readonly issuer?: string
   readonly offset?: number
   readonly limit?: number
 }
 
-interface WorkWithAnchor extends Work {
+interface WorkWithAnchor extends SignedVerifiableClaim {
   readonly timestamp: PoetBlockAnchor
 }
 
@@ -62,9 +67,11 @@ export class WorkController {
     return { count, works }
   }
 
-  async create(work: Work): Promise<void> {
+  async create(work: SignedVerifiableClaim): Promise<void> {
     this.logger.trace({ method: 'create', work }, 'Creating Work')
     // TODO: verify id, publicKey, signature and createdDate
+    const { isValidSignedVerifiableClaim } = getVerifiableClaimSigner()
+    if (!(await isValidSignedVerifiableClaim(work))) throw new IllegalArgumentException('Invalid Work Claim')
     await this.messaging.publish(this.exchange.newClaim, work)
   }
 }

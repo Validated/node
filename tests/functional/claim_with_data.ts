@@ -1,19 +1,28 @@
 /* tslint:disable:no-relative-imports */
-import { ClaimType, createClaim, isValidClaim } from '@po.et/poet-js'
+import { configureCreateVerifiableClaim, getVerifiableClaimSigner } from '@po.et/poet-js'
 import { path } from 'ramda'
 import { describe } from 'riteway'
 import { app } from '../../src/app'
+import { issuerACD, PrivateKeyACD } from '../../test/Claims'
+import { pipe } from '../../test/Integration/Helper'
 import { ensureBitcoinBalance } from '../helpers/bitcoin'
 import { dbHelper } from '../helpers/database'
 import { delay, runtimeId } from '../helpers/utils'
 import { getWork, postWork } from '../helpers/works'
 const Client = require('bitcoin-core')
 
+const { configureSignVerifiableClaim, isValidSignedVerifiableClaim } = getVerifiableClaimSigner()
+const createWorkClaim = configureCreateVerifiableClaim({ issuer: issuerACD })
+const signWorkClaim = configureSignVerifiableClaim({ privateKey: PrivateKeyACD })
+const createAndSignClaim = pipe(
+  createWorkClaim,
+  signWorkClaim
+)
+
 const PREFIX_A = `test-functional-nodeA-poet-${runtimeId()}`
 const NODE_A_PORT = '28081'
 const PREFIX_B = `test-functional-nodeB-poet-${runtimeId()}`
 const NODE_B_PORT = '28082'
-const privateKey = 'L1mptZyB6aWkiJU7dvAK4UUjLSaqzcRNYJn3KuAA7oEVyiNn3ZPF'
 const getWorkFromNodeA = getWork(NODE_A_PORT)
 const postWorkToNodeA = postWork(NODE_A_PORT)
 const getWorkFromNodeB = getWork(NODE_B_PORT)
@@ -44,8 +53,6 @@ const createDatabase = async (prefix: string) => {
 }
 
 describe('A user can successfully submit a claim into the po.et network', async (assert: any) => {
-  const text = 'A most excellent read...'
-
   const dbA = await createDatabase(PREFIX_A)
   const serverA = await app({
     BITCOIN_URL: process.env.BITCOIN_URL || 'bitcoind-1',
@@ -75,16 +82,14 @@ describe('A user can successfully submit a claim into the po.et network', async 
   await delay(5 * 1000)
 
   // Create a claim.
-
-  const claim = await createClaim(privateKey, ClaimType.Work, {
+  const claim = await createAndSignClaim({
     name: 'Author Name',
-    text,
   })
 
   assert({
     given: 'a newly created claim',
     should: 'be valid',
-    actual: await isValidClaim(claim),
+    actual: await isValidSignedVerifiableClaim(claim),
     expected: true,
   })
 

@@ -1,3 +1,4 @@
+import { getVerifiableClaimSigner } from '@po.et/poet-js'
 import { Messaging } from 'Messaging/Messaging'
 import { Db, Server } from 'mongodb'
 import * as Pino from 'pino'
@@ -35,7 +36,8 @@ describe('StorageReader Router', async (assert: any) => {
     new Db('poet', server),
     new Messaging('', exchangeConfigurationMessaging),
     new IPFS(IPFSConfiguration),
-    claimControllerConfiguration
+    claimControllerConfiguration,
+    getVerifiableClaimSigner()
   )
 
   const serviceConfiguration: ServiceConfiguration = {

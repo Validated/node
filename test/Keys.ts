@@ -1,4 +1,4 @@
 export const Key1 = {
-  privateKey: 'L1mptZyB6aWkiJU7dvAK4UUjLSaqzcRNYJn3KuAA7oEVyiNn3ZPF',
-  publicKey: '02cab54b227f16dd4866310799842cdd239f2adb56d0a3789519c6f43a892a61f6',
+  publicKey: 'GaEfvADKAL5euVB6qgjuv9g2Lh9Pa3anZLKf4gRQoYS4',
+  privateKey: '2fac76SnmCGNE8DRYgiAdt2hB2J5GnKJ8wzPL6uu1AUVexnbuRnfRAsZU5ZNX46rASXWvvP5n8J153h2kbg66Uja',
 }

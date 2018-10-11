@@ -1,10 +1,11 @@
-import { Claim } from '@po.et/poet-js'
+/* tslint:disable:no-relative-imports */
 import { FindAndModifyWriteOpResultObject } from 'mongodb'
 import { describe, Try } from 'riteway'
 
+import { TheRaven } from '../../test/Claims'
 import { getClaimFromFindAndUpdateResponse, throwIfClaimNotFound } from './DAOClaims'
 
-describe('DOAClaims.getClaimFromFindAndUpdateResponse', async assert => {
+describe('DOAClaims.getClaimFromFindAndUpdateResponse', async (assert: any) => {
   {
     const response: FindAndModifyWriteOpResultObject = {}
     assert({
@@ -26,22 +27,21 @@ describe('DOAClaims.getClaimFromFindAndUpdateResponse', async assert => {
   }
 
   {
-    const claim = { id: 'bar' } as Claim
     const response: FindAndModifyWriteOpResultObject = {
       value: {
-        claim,
+        claim: TheRaven,
       },
     }
     assert({
       given: 'a response that contians a claim',
       should: 'return the correct value',
       actual: getClaimFromFindAndUpdateResponse(response),
-      expected: claim,
+      expected: TheRaven,
     })
   }
 })
 
-describe('DOAClaims.throwIfClaimNotFound', async assert => {
+describe('DOAClaims.throwIfClaimNotFound', async (assert: any) => {
   assert({
     given: 'null',
     should: 'throw',
@@ -57,12 +57,11 @@ describe('DOAClaims.throwIfClaimNotFound', async assert => {
   })
 
   {
-    const claim: Claim = { id: 'bar' } as Claim
     assert({
       given: 'a claim',
       should: 'return the claim',
-      actual: throwIfClaimNotFound(claim),
-      expected: claim,
+      actual: throwIfClaimNotFound(TheRaven),
+      expected: TheRaven,
     })
   }
 })

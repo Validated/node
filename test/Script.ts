@@ -1,12 +1,13 @@
 /* tslint:disable:no-console */
-import { createClaim, ClaimType } from '@po.et/poet-js'
+/* tslint:disable:no-relative-imports */
+import { configureCreateVerifiableClaim, getVerifiableClaimSigner } from '@po.et/poet-js'
 
 import {
   AStudyInScarlet,
-  PrivateKeyEAP,
-  PrivateKeyACD,
+  issuerACD,
+  issuerEAP,
+  issuerMA,
   TheMurdersInTheRueMorgue,
-  PrivateKeyMA,
   TheWeekOfDiana,
   KnowWhyTheCagedBirdSings,
   GatherTogetherInMyName,
@@ -17,21 +18,50 @@ import {
   MomAndMeAndMom,
   OnThePulseOfMorning,
   ABraveAndStartlingTrugh,
+  PrivateKeyACD,
+  PrivateKeyEAP,
+  PrivateKeyMA,
 } from './Claims'
+import { pipe } from './Integration/Helper'
+
+const { configureSignVerifiableClaim } = getVerifiableClaimSigner()
+
+const createACDWorkClaim = configureCreateVerifiableClaim({ issuer: issuerACD })
+const createEAPWorkClaim = configureCreateVerifiableClaim({ issuer: issuerEAP })
+const createMAWorkClaim = configureCreateVerifiableClaim({ issuer: issuerMA })
+
+const signACDWorkClaim = configureSignVerifiableClaim({ privateKey: PrivateKeyACD })
+const signEAPWorkClaim = configureSignVerifiableClaim({ privateKey: PrivateKeyEAP })
+const signMAWorkClaim = configureSignVerifiableClaim({ privateKey: PrivateKeyMA })
+
+const createACDClaim = pipe(
+  createACDWorkClaim,
+  signACDWorkClaim
+)
+
+const createEAPClaim = pipe(
+  createEAPWorkClaim,
+  signEAPWorkClaim
+)
+
+const createMAClaim = pipe(
+  createMAWorkClaim,
+  signMAWorkClaim
+)
 
 const setUpClaims = async () => {
-  console.log(await createClaim(PrivateKeyACD, ClaimType.Work, AStudyInScarlet.attributes))
-  console.log(await createClaim(PrivateKeyEAP, ClaimType.Work, TheMurdersInTheRueMorgue.attributes))
-  console.log(await createClaim(PrivateKeyMA, ClaimType.Work, TheWeekOfDiana.attributes))
-  console.log(await createClaim(PrivateKeyMA, ClaimType.Work, KnowWhyTheCagedBirdSings.attributes))
-  console.log(await createClaim(PrivateKeyMA, ClaimType.Work, GatherTogetherInMyName.attributes))
-  console.log(await createClaim(PrivateKeyMA, ClaimType.Work, SinginAndSwinginAndGettingMerryLikeChristmas.attributes))
-  console.log(await createClaim(PrivateKeyMA, ClaimType.Work, TheHeartOfAWoman.attributes))
-  console.log(await createClaim(PrivateKeyMA, ClaimType.Work, AllGodsChildrenNeedTravelingShoes.attributes))
-  console.log(await createClaim(PrivateKeyMA, ClaimType.Work, ASongFlungUpToHeaven.attributes))
-  console.log(await createClaim(PrivateKeyMA, ClaimType.Work, MomAndMeAndMom.attributes))
-  console.log(await createClaim(PrivateKeyMA, ClaimType.Work, OnThePulseOfMorning.attributes))
-  console.log(await createClaim(PrivateKeyMA, ClaimType.Work, ABraveAndStartlingTrugh.attributes))
+  console.log(JSON.stringify(await createACDClaim(AStudyInScarlet.claim), null, 2))
+  console.log(JSON.stringify(await createEAPClaim(TheMurdersInTheRueMorgue.claim), null, 2))
+  console.log(JSON.stringify(await createMAClaim(TheWeekOfDiana.claim), null, 2))
+  console.log(JSON.stringify(await createMAClaim(KnowWhyTheCagedBirdSings.claim), null, 2))
+  console.log(JSON.stringify(await createMAClaim(GatherTogetherInMyName.claim), null, 2))
+  console.log(JSON.stringify(await createMAClaim(SinginAndSwinginAndGettingMerryLikeChristmas.claim), null, 2))
+  console.log(JSON.stringify(await createMAClaim(TheHeartOfAWoman.claim), null, 2))
+  console.log(JSON.stringify(await createMAClaim(AllGodsChildrenNeedTravelingShoes.claim), null, 2))
+  console.log(JSON.stringify(await createMAClaim(ASongFlungUpToHeaven.claim), null, 2))
+  console.log(JSON.stringify(await createMAClaim(MomAndMeAndMom.claim), null, 2))
+  console.log(JSON.stringify(await createMAClaim(OnThePulseOfMorning.claim), null, 2))
+  console.log(JSON.stringify(await createMAClaim(ABraveAndStartlingTrugh.claim), null, 2))
 }
 
 setUpClaims().catch(console.error)

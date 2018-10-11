@@ -1,4 +1,4 @@
-import { Claim } from '@po.et/poet-js'
+import { SignedVerifiableClaim } from '@po.et/poet-js'
 import fetch from 'node-fetch'
 import { promisify } from 'util'
 
@@ -32,11 +32,11 @@ export class Client {
     return fetch(this.url + '/works/?test=' + test)
   }
 
-  getWorksByPublicKey(publicKey: string) {
-    return fetch(this.url + '/works/?publicKey=' + publicKey)
+  getWorksByIssuer(issuer: string) {
+    return fetch(`${this.url}/works/?issuer=${issuer}`)
   }
 
-  postWork(claim: Claim) {
+  postWork(claim: SignedVerifiableClaim) {
     return fetch(this.url + '/works/', {
       method: 'POST',
       headers: {
@@ -53,6 +53,6 @@ export class Client {
  *  Not particularly deterministic, but we can expect something to be wrong if integration
  *  tests cause such big delays.
  */
-export function waitForNode() {
-  return delay(1300)
-}
+export const waitForNode = () => delay(1300)
+
+export const pipe = (...fns: any[]) => (doc: any) => fns.reduce(async (doc, fn) => fn(await doc), doc)

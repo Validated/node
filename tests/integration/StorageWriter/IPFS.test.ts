@@ -18,7 +18,7 @@ const fetchFile = async (hash: string): Promise<string> => {
   return response.text()
 }
 
-describe('IPFS.addText', async assert => {
+describe('IPFS.addText', async (assert: any) => {
   {
     const ipfs = createIPFS()
     const claim = allAsciiCharactersClaim

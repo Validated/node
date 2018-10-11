@@ -1,10 +1,10 @@
 import {
   ClaimType,
   isWork,
-  isValidSignature,
   IllegalArgumentException,
   NotFoundException,
-  isClaim,
+  isSignedVerifiableClaim,
+  VerifiableClaimSigner,
 } from '@po.et/poet-js'
 import * as http from 'http'
 import { injectable, inject } from 'inversify'
@@ -33,15 +33,18 @@ export class Router {
   private readonly koaRouter = new KoaRouter()
   private readonly workController: WorkController
   private server: http.Server
+  private readonly verifiableClaimSigner: VerifiableClaimSigner
 
   constructor(
     @inject('Logger') logger: Pino.Logger,
     @inject('RouterConfiguration') configuration: RouterConfiguration,
-    @inject('WorkController') workController: WorkController
+    @inject('WorkController') workController: WorkController,
+    @inject('VerifiableClaimSigner') verifiableClaimSigner: VerifiableClaimSigner
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.configuration = configuration
     this.workController = workController
+    this.verifiableClaimSigner = verifiableClaimSigner
 
     const getWorkSchema = {
       params: {
@@ -106,11 +109,13 @@ export class Router {
 
     this.logger.trace({ body }, 'POST /works')
 
-    if (!isClaim(body)) throw new IllegalArgumentException('Request Body must be a Claim.')
+    if (!isSignedVerifiableClaim(body)) throw new IllegalArgumentException('Request Body must be a Claim.')
 
-    if (!isWork(body)) throw new IllegalArgumentException(`Claim's type must be ${ClaimType.Work}, not ${body.type}`)
+    if (!isWork(body))
+      throw new IllegalArgumentException(`Claim's type must be ${ClaimType.Work}, not ${Object(body).type}`)
 
-    if (!isValidSignature(body)) throw new IllegalArgumentException("Claim's signature is incorrect.")
+    if (!this.verifiableClaimSigner.isValidSignature(body))
+      throw new IllegalArgumentException("Claim's signature is incorrect.")
 
     await this.workController.create(body)
 

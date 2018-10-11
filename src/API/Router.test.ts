@@ -1,3 +1,4 @@
+import { getVerifiableClaimSigner } from '@po.et/poet-js'
 import { Messaging } from 'Messaging/Messaging'
 import { Db, Server } from 'mongodb'
 import * as Pino from 'pino'
@@ -30,7 +31,7 @@ describe('API Router', async (assert: any) => {
   )
 
   {
-    const router = new Router(Pino(), configuration, workController)
+    const router = new Router(Pino(), configuration, workController, getVerifiableClaimSigner())
 
     assert({
       given: 'the new instance of Router',

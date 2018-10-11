@@ -1,5 +1,5 @@
 /* tslint:disable:no-relative-imports */
-import { Claim } from '@po.et/poet-js'
+import { SignedVerifiableClaim } from '@po.et/poet-js'
 import { AsyncTest, Expect, SetupFixture, TestCase, TestFixture } from 'alsatian'
 
 import { AStudyInScarlet, TheMurdersInTheRueMorgue, TheRaven } from '../Claims'
@@ -18,16 +18,16 @@ export class GetWork {
   @TestCase(TheRaven)
   @TestCase(TheMurdersInTheRueMorgue)
   @TestCase(AStudyInScarlet)
-  async getWork200(claim: Claim) {
-    const response = await this.client.getWork(claim.id)
+  async getWork200(signedVerifiableClaim: SignedVerifiableClaim) {
+    const response = await this.client.getWork(signedVerifiableClaim.id)
 
     Expect(response.status).toBe(200)
     Expect(response.ok).toBeTruthy()
 
     const body = await response.json()
 
-    Expect(body.id).toBe(claim.id)
-    Expect(body.attributes.name).toBe(claim.attributes.name)
+    Expect(body.id).toBe(signedVerifiableClaim.id)
+    Expect(body.attributes.name).toBe(Object(signedVerifiableClaim).claim.name)
   }
 
   @AsyncTest()

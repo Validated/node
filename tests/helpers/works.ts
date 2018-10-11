@@ -1,10 +1,10 @@
-import { Claim } from '@po.et/poet-js'
+import { SignedVerifiableClaim } from '@po.et/poet-js'
 import fetch from 'node-fetch'
 
 const baseUrl = (port: string, host: string = 'localhost') => `http://${host}:${port}`
 export const getWork = (port: string, host?: string) => (id: string) => fetch(`${baseUrl(port, host)}/works/${id}`)
 
-export const postWork = (port: string, host?: string) => (claim: Claim) =>
+export const postWork = (port: string, host?: string) => (claim: SignedVerifiableClaim) =>
   fetch(`${baseUrl(port, host)}/works/`, {
     method: 'POST',
     headers: {

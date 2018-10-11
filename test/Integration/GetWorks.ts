@@ -1,5 +1,5 @@
 /* tslint:disable:no-relative-imports */
-import { Claim, isClaim } from '@po.et/poet-js'
+import { SignedVerifiableClaim, isSignedVerifiableClaim } from '@po.et/poet-js'
 import { AsyncTest, Expect, SetupFixture, TestCase, TestFixture } from 'alsatian'
 import { pipe, not } from 'ramda'
 
@@ -66,18 +66,18 @@ export class GetWorks {
   }
 
   @AsyncTest()
-  @TestCase(ABraveAndStartlingTrugh.publicKey)
-  async getWorksShouldReturnCountInHeader(publicKey: string) {
-    const response = await this.client.getWorksByPublicKey(publicKey)
+  @TestCase(ABraveAndStartlingTrugh.issuer)
+  async getWorksShouldReturnCountInHeader(issuer: string) {
+    const response = await this.client.getWorksByIssuer(issuer)
     const totalCount = await response.headers.get('X-Total-Count')
     const isEqualToClaimsAvailable = parseInt(totalCount, 10) === 10
     Expect(isEqualToClaimsAvailable).toBeTruthy()
   }
 
   @AsyncTest()
-  @TestCase('5', ABraveAndStartlingTrugh.publicKey)
-  async getOffsetAngelouWorksShouldReturn5(offset: string, publicKey: string) {
-    const response = await this.client.getOffsetPublicKeyWorks(offset, publicKey)
+  @TestCase('5', ABraveAndStartlingTrugh.issuer)
+  async getOffsetAngelouWorksShouldReturn5(offset: string, issuer: string) {
+    const response = await this.client.getOffsetPublicKeyWorks(offset, issuer)
     const claims = await response.json()
     const equalTo5 = (claims.length = 5)
     Expect(equalTo5).toBeTruthy()
@@ -94,7 +94,7 @@ export class GetWorks {
     const claims = await response.json()
     const allElementsAreClaims = !claims.some(
       pipe(
-        isClaim,
+        isSignedVerifiableClaim,
         not
       )
     )
@@ -110,13 +110,13 @@ export class GetWorks {
     Expect(response.status).toBe(200)
     Expect(response.ok).toBeTruthy()
 
-    const claims: ReadonlyArray<Claim> = await response.json()
+    const claims: ReadonlyArray<SignedVerifiableClaim> = await response.json()
 
     for (const claim of claims) {
       Expect(claim.id).toBeTruthy()
-      Expect(claim.publicKey).toBeTruthy()
-      Expect(claim.signature).toBeTruthy()
-      Expect(claim.created).toBeTruthy()
+      Expect(claim.issuer).toBeTruthy()
+      Expect(claim['sec:proof']).toBeTruthy()
+      Expect(claim.issuanceDate).toBeTruthy()
     }
   }
 
@@ -129,19 +129,19 @@ export class GetWorks {
   }
 
   @AsyncTest()
-  @TestCase(TheRaven.publicKey)
-  async getWorksShouldReturnMoreThanByPublicKey(publicKey?: string) {
+  @TestCase(TheRaven.issuer)
+  async getWorksShouldReturnMoreThanByPublicKey(issuer?: string) {
     const response = await this.client.getWorks()
-    const publicKeyResponse = await this.client.getWorksByPublicKey(publicKey)
+    const issuerResponse = await this.client.getWorksByIssuer(issuer)
 
     Expect(response.status).toBe(200)
     Expect(response.ok).toBeTruthy()
-    Expect(publicKeyResponse.status).toBe(200)
-    Expect(publicKeyResponse.ok).toBeTruthy()
+    Expect(issuerResponse.status).toBe(200)
+    Expect(issuerResponse.ok).toBeTruthy()
 
     const claims = await response.json()
-    const publicKeyClaims = await publicKeyResponse.json()
-    const getWorksReturnsMore = claims.length > publicKeyClaims.length
+    const issuerClaims = await issuerResponse.json()
+    const getWorksReturnsMore = claims.length > issuerClaims.length
 
     Expect(getWorksReturnsMore).toBeTruthy()
   }
