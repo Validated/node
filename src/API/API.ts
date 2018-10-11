@@ -1,3 +1,4 @@
+import { getVerifiableClaimSigner, VerifiableClaimSigner } from '@po.et/poet-js'
 import { injectable, Container } from 'inversify'
 import { MongoClient, Db } from 'mongodb'
 import * as Pino from 'pino'
@@ -59,5 +60,6 @@ export class API {
     this.container.bind<WorkController>('WorkController').to(WorkController)
     this.container.bind<Messaging>('Messaging').toConstantValue(this.messaging)
     this.container.bind<ExchangeConfiguration>('ExchangeConfiguration').toConstantValue(this.configuration.exchanges)
+    this.container.bind<VerifiableClaimSigner>('VerifiableClaimSigner').toConstantValue(getVerifiableClaimSigner())
   }
 }
