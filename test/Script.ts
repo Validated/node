@@ -1,6 +1,7 @@
 /* tslint:disable:no-console */
 /* tslint:disable:no-relative-imports */
 import { configureCreateVerifiableClaim, getVerifiableClaimSigner } from '@po.et/poet-js'
+import { pipeP } from 'ramda'
 
 import {
   AStudyInScarlet,
@@ -22,7 +23,6 @@ import {
   PrivateKeyEAP,
   PrivateKeyMA,
 } from './Claims'
-import { pipe } from './Integration/Helper'
 
 const { configureSignVerifiableClaim } = getVerifiableClaimSigner()
 
@@ -34,17 +34,17 @@ const signACDWorkClaim = configureSignVerifiableClaim({ privateKey: PrivateKeyAC
 const signEAPWorkClaim = configureSignVerifiableClaim({ privateKey: PrivateKeyEAP })
 const signMAWorkClaim = configureSignVerifiableClaim({ privateKey: PrivateKeyMA })
 
-const createACDClaim = pipe(
+const createACDClaim = pipeP(
   createACDWorkClaim,
   signACDWorkClaim
 )
 
-const createEAPClaim = pipe(
+const createEAPClaim = pipeP(
   createEAPWorkClaim,
   signEAPWorkClaim
 )
 
-const createMAClaim = pipe(
+const createMAClaim = pipeP(
   createMAWorkClaim,
   signMAWorkClaim
 )

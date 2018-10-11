@@ -1,10 +1,9 @@
 /* tslint:disable:no-relative-imports */
 import { configureCreateVerifiableClaim, getVerifiableClaimSigner } from '@po.et/poet-js'
-import { path } from 'ramda'
+import { path, pipeP } from 'ramda'
 import { describe } from 'riteway'
 import { app } from '../../src/app'
 import { issuerACD, PrivateKeyACD } from '../../test/Claims'
-import { pipe } from '../../test/Integration/Helper'
 import { ensureBitcoinBalance } from '../helpers/bitcoin'
 import { dbHelper } from '../helpers/database'
 import { delay, runtimeId } from '../helpers/utils'
@@ -14,7 +13,7 @@ const Client = require('bitcoin-core')
 const { configureSignVerifiableClaim, isValidSignedVerifiableClaim } = getVerifiableClaimSigner()
 const createWorkClaim = configureCreateVerifiableClaim({ issuer: issuerACD })
 const signWorkClaim = configureSignVerifiableClaim({ privateKey: PrivateKeyACD })
-const createAndSignClaim = pipe(
+const createAndSignClaim = pipeP(
   createWorkClaim,
   signWorkClaim
 )

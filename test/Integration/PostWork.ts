@@ -1,9 +1,10 @@
 /* tslint:disable:no-relative-imports */
 import { configureCreateVerifiableClaim, createIssuerFromPrivateKey, getVerifiableClaimSigner } from '@po.et/poet-js'
 import { AsyncTest, Expect, SetupFixture, TestFixture, Timeout } from 'alsatian'
+import { pipeP } from 'ramda'
 
 import { Key1 } from '../Keys'
-import { Client, pipe, waitForNode } from './Helper'
+import { Client, waitForNode } from './Helper'
 
 const issuer = createIssuerFromPrivateKey(Key1.privateKey)
 
@@ -11,7 +12,10 @@ const { configureSignVerifiableClaim } = getVerifiableClaimSigner()
 const createWorkClaim = configureCreateVerifiableClaim({ issuer })
 const signWorkClaim = configureSignVerifiableClaim({ privateKey: Key1.privateKey })
 
-const createClaim = pipe([createWorkClaim, signWorkClaim])
+const createClaim = pipeP(
+  createWorkClaim,
+  signWorkClaim
+)
 
 @TestFixture('POST /works')
 export class PostWork {
