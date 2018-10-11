@@ -123,7 +123,7 @@ export class Router {
     if (!isWork(body))
       throw new IllegalArgumentException(`Claim's type must be ${ClaimType.Work}, not ${Object(body).type}`)
 
-    if (!this.verifiableClaimSigner.isValidSignature(body))
+    if (!(await this.verifiableClaimSigner.isValidSignature(body)))
       throw new IllegalArgumentException("Claim's signature is incorrect.")
 
     await this.workController.create(body)
