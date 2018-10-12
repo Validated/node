@@ -3,7 +3,7 @@ import { SignedVerifiableClaim, isSignedVerifiableClaim } from '@po.et/poet-js'
 import { AsyncTest, Expect, SetupFixture, TestCase, TestFixture } from 'alsatian'
 import { pipe, not } from 'ramda'
 
-import { TheRaven, ABraveAndStartlingTrugh } from '../Claims'
+import { TheRaven, ABraveAndStartlingTruth } from '../Claims'
 import { Client } from './Helper'
 
 @TestFixture('GET /works')
@@ -66,7 +66,7 @@ export class GetWorks {
   }
 
   @AsyncTest()
-  @TestCase(ABraveAndStartlingTrugh.issuer)
+  @TestCase(ABraveAndStartlingTruth.issuer)
   async getWorksShouldReturnCountInHeader(issuer: string) {
     const response = await this.client.getWorksByIssuer(issuer)
     const totalCount = await response.headers.get('X-Total-Count')
@@ -75,7 +75,7 @@ export class GetWorks {
   }
 
   @AsyncTest()
-  @TestCase('5', ABraveAndStartlingTrugh.issuer)
+  @TestCase('5', ABraveAndStartlingTruth.issuer)
   async getOffsetAngelouWorksShouldReturn5(offset: string, issuer: string) {
     const response = await this.client.getOffsetPublicKeyWorks(offset, issuer)
     const claims = await response.json()

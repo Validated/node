@@ -16,7 +16,7 @@ import {
   ASongFlungUpToHeaven,
   MomAndMeAndMom,
   OnThePulseOfMorning,
-  ABraveAndStartlingTrugh,
+  ABraveAndStartlingTruth,
 } from './Claims'
 import { waitForNode } from './Integration/Helper'
 
@@ -61,7 +61,7 @@ async function insertTestWorks(db: Db) {
   await collection.insertOne(ASongFlungUpToHeaven)
   await collection.insertOne(MomAndMeAndMom)
   await collection.insertOne(OnThePulseOfMorning)
-  await collection.insertOne(ABraveAndStartlingTrugh)
+  await collection.insertOne(ABraveAndStartlingTruth)
 }
 
 main().catch(console.error)

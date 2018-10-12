@@ -19,7 +19,7 @@ import {
   ASongFlungUpToHeaven,
   MomAndMeAndMom,
   OnThePulseOfMorning,
-  ABraveAndStartlingTrugh,
+  ABraveAndStartlingTruth,
   PrivateKeyACD,
   PrivateKeyEAP,
   PrivateKeyMA,
@@ -63,7 +63,7 @@ const setUpClaims = async () => {
   console.log(await createMAClaim(ASongFlungUpToHeaven.claim))
   console.log(await createMAClaim(MomAndMeAndMom.claim))
   console.log(await createMAClaim(OnThePulseOfMorning.claim))
-  console.log(await createMAClaim(ABraveAndStartlingTrugh.claim))
+  console.log(await createMAClaim(ABraveAndStartlingTruth.claim))
 }
 
 setUpClaims().catch(console.error)
