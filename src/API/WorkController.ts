@@ -1,9 +1,4 @@
-import {
-  IllegalArgumentException,
-  PoetBlockAnchor,
-  SignedVerifiableClaim,
-  VerifiableClaimSigner,
-} from '@po.et/poet-js'
+import { IllegalArgumentException, PoetBlockAnchor, SignedVerifiableClaim, VerifiableClaimSigner } from '@po.et/poet-js'
 import { inject, injectable } from 'inversify'
 import { Collection, Db } from 'mongodb'
 import * as Pino from 'pino'
@@ -72,7 +67,8 @@ export class WorkController {
 
   async create(work: SignedVerifiableClaim): Promise<void> {
     this.logger.trace({ method: 'create', work }, 'Creating Work')
-    if (!(await this.verifiableClaimSigner.isValidSignedVerifiableClaim(work))) throw new IllegalArgumentException('Invalid Work Claim')
+    if (!(await this.verifiableClaimSigner.isValidSignedVerifiableClaim(work)))
+      throw new IllegalArgumentException('Invalid Work Claim')
     await this.messaging.publish(this.exchange.newClaim, work)
   }
 }
