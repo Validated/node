@@ -54,5 +54,3 @@ export class Client {
  *  tests cause such big delays.
  */
 export const waitForNode = () => delay(1300)
-
-export const pipe = (...fns: any[]) => (doc: any) => fns.reduce(async (doc, fn) => fn(await doc), doc)
