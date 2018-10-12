@@ -9,6 +9,7 @@ import {
   issuerEAP,
   issuerMA,
   TheMurdersInTheRueMorgue,
+  TheRaven,
   TheWeekOfDiana,
   KnowWhyTheCagedBirdSings,
   GatherTogetherInMyName,
@@ -50,18 +51,19 @@ const createMAClaim = pipeP(
 )
 
 const setUpClaims = async () => {
-  console.log(JSON.stringify(await createACDClaim(AStudyInScarlet.claim), null, 2))
-  console.log(JSON.stringify(await createEAPClaim(TheMurdersInTheRueMorgue.claim), null, 2))
-  console.log(JSON.stringify(await createMAClaim(TheWeekOfDiana.claim), null, 2))
-  console.log(JSON.stringify(await createMAClaim(KnowWhyTheCagedBirdSings.claim), null, 2))
-  console.log(JSON.stringify(await createMAClaim(GatherTogetherInMyName.claim), null, 2))
-  console.log(JSON.stringify(await createMAClaim(SinginAndSwinginAndGettingMerryLikeChristmas.claim), null, 2))
-  console.log(JSON.stringify(await createMAClaim(TheHeartOfAWoman.claim), null, 2))
-  console.log(JSON.stringify(await createMAClaim(AllGodsChildrenNeedTravelingShoes.claim), null, 2))
-  console.log(JSON.stringify(await createMAClaim(ASongFlungUpToHeaven.claim), null, 2))
-  console.log(JSON.stringify(await createMAClaim(MomAndMeAndMom.claim), null, 2))
-  console.log(JSON.stringify(await createMAClaim(OnThePulseOfMorning.claim), null, 2))
-  console.log(JSON.stringify(await createMAClaim(ABraveAndStartlingTrugh.claim), null, 2))
+  console.log(await createACDClaim(AStudyInScarlet.claim))
+  console.log(await createEAPClaim(TheMurdersInTheRueMorgue.claim))
+  console.log(await createEAPClaim(TheRaven.claim))
+  console.log(await createMAClaim(TheWeekOfDiana.claim))
+  console.log(await createMAClaim(KnowWhyTheCagedBirdSings.claim))
+  console.log(await createMAClaim(GatherTogetherInMyName.claim))
+  console.log(await createMAClaim(SinginAndSwinginAndGettingMerryLikeChristmas.claim))
+  console.log(await createMAClaim(TheHeartOfAWoman.claim))
+  console.log(await createMAClaim(AllGodsChildrenNeedTravelingShoes.claim))
+  console.log(await createMAClaim(ASongFlungUpToHeaven.claim))
+  console.log(await createMAClaim(MomAndMeAndMom.claim))
+  console.log(await createMAClaim(OnThePulseOfMorning.claim))
+  console.log(await createMAClaim(ABraveAndStartlingTrugh.claim))
 }
 
 setUpClaims().catch(console.error)
