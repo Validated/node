@@ -9,7 +9,6 @@ import { HealthConfiguration } from './HealthConfiguration'
 import { HealthController } from './HealthController'
 import { HealthService } from './HealthService'
 import { HealthServiceConfiguration } from './HealthServiceConfiguration'
-import { IPFS, IPFSConfiguration } from './IPFS'
 
 export class Health {
   private readonly logger: Pino.Logger
@@ -49,10 +48,6 @@ export class Health {
     this.container.bind<Db>('DB').toConstantValue(this.dbConnection)
     this.container.bind<HealthService>('Cron').to(HealthService)
     this.container.bind<HealthController>('HealthController').to(HealthController)
-    this.container.bind<IPFS>('IPFS').to(IPFS)
-    this.container.bind<IPFSConfiguration>('IPFSConfiguration').toConstantValue({
-      ipfsUrl: this.configuration.ipfsUrl,
-    })
     this.container.bind<BitcoinCore>('BitcoinCore').toConstantValue(
       new BitcoinCore({
         host: this.configuration.bitcoinUrl,

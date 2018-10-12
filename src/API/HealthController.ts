@@ -1,7 +1,10 @@
 import { inject, injectable } from 'inversify'
 import { Db, Collection } from 'mongodb'
 
+import { IPFS } from './IPFS'
+
 export const isOkOne = ({ ok }: { ok: number }) => ok === 1
+export const isStatus200 = ({ status }: { status: number }) => status === 200
 
 interface WalletInfo {
   readonly balance: number
@@ -36,10 +39,12 @@ interface HealthObject {
 @injectable()
 export class HealthController {
   private readonly db: Db
+  private readonly ipfs: IPFS
   private readonly collection: Collection
 
-  constructor(@inject('DB') db: Db) {
+  constructor(@inject('DB') db: Db, @inject('IPFS') ipfs: IPFS) {
     this.db = db
+    this.ipfs = ipfs
     this.collection = this.db.collection('health')
   }
 
@@ -52,14 +57,12 @@ export class HealthController {
     }
   }
 
-  private async checkIPFS(): Promise<any> {
+  private async checkIPFS(): Promise<boolean> {
     try {
-      const { ipfsIsConnected } = (await this.collection.findOne({ name: 'ipfsConnected' })) || {
-        ipfsIsConnected: 'Checking IPFS Connection...',
-      }
-      return ipfsIsConnected
+      const ipfsConnection = await this.ipfs.getVersion()
+      return isStatus200(ipfsConnection)
     } catch (e) {
-      return e
+      return false
     }
   }
 

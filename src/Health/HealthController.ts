@@ -4,7 +4,6 @@ import { Collection, Db } from 'mongodb'
 import * as Pino from 'pino'
 
 import { childWithFileName } from 'Helpers/Logging'
-import { IPFS } from './IPFS'
 
 export const isStatus200 = ({ status }: { status: number }) => status === 200
 
@@ -14,34 +13,16 @@ export class HealthController {
   private readonly collection: Collection
   private readonly bitcoinCore: BitcoinCore
   private readonly logger: Pino.Logger
-  private readonly ipfs: IPFS
 
   constructor(
     @inject('Logger') logger: Pino.Logger,
     @inject('DB') db: Db,
     @inject('BitcoinCore') bitcoinCore: BitcoinCore,
-    @inject('IPFS') ipfs: IPFS
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.db = db
     this.collection = this.db.collection('health')
     this.bitcoinCore = bitcoinCore
-    this.ipfs = ipfs
-  }
-
-  async checkIpfsConnection(): Promise<any> {
-    this.logger.trace('Checking IPFS...')
-    const connection = await this.ipfs.getVersion()
-    const ipfsIsConnected = isStatus200(connection)
-    await this.collection.updateOne(
-      { name: 'ipfsConnected' },
-      {
-        $set: {
-          ipfsIsConnected,
-        },
-      },
-      { upsert: true }
-    )
   }
 
   async getBlockchainInfo(): Promise<void> {
