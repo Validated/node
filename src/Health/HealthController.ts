@@ -17,7 +17,7 @@ export class HealthController {
   constructor(
     @inject('Logger') logger: Pino.Logger,
     @inject('DB') db: Db,
-    @inject('BitcoinCore') bitcoinCore: BitcoinCore,
+    @inject('BitcoinCore') bitcoinCore: BitcoinCore
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.db = db
