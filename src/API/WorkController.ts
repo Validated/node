@@ -1,8 +1,8 @@
 import {
-  getVerifiableClaimSigner,
   IllegalArgumentException,
   PoetBlockAnchor,
   SignedVerifiableClaim,
+  VerifiableClaimSigner,
 } from '@po.et/poet-js'
 import { inject, injectable } from 'inversify'
 import { Collection, Db } from 'mongodb'
@@ -35,18 +35,21 @@ export class WorkController {
   private readonly collection: Collection
   private readonly messaging: Messaging
   private readonly exchange: ExchangeConfiguration
+  private readonly verifiableClaimSigner: VerifiableClaimSigner
 
   constructor(
     @inject('Logger') logger: Pino.Logger,
     @inject('DB') db: Db,
     @inject('Messaging') messaging: Messaging,
-    @inject('ExchangeConfiguration') exchange: ExchangeConfiguration
+    @inject('ExchangeConfiguration') exchange: ExchangeConfiguration,
+    @inject('VerifiableClaimSigner') verifiableClaimSigner: VerifiableClaimSigner
   ) {
     this.logger = childWithFileName(logger, __filename)
     this.db = db
     this.collection = this.db.collection('works')
     this.messaging = messaging
     this.exchange = exchange
+    this.verifiableClaimSigner = verifiableClaimSigner
   }
 
   async getById(id: string): Promise<any> {
@@ -69,9 +72,7 @@ export class WorkController {
 
   async create(work: SignedVerifiableClaim): Promise<void> {
     this.logger.trace({ method: 'create', work }, 'Creating Work')
-    // TODO: verify id, publicKey, signature and createdDate
-    const { isValidSignedVerifiableClaim } = getVerifiableClaimSigner()
-    if (!(await isValidSignedVerifiableClaim(work))) throw new IllegalArgumentException('Invalid Work Claim')
+    if (!(await this.verifiableClaimSigner.isValidSignedVerifiableClaim(work))) throw new IllegalArgumentException('Invalid Work Claim')
     await this.messaging.publish(this.exchange.newClaim, work)
   }
 }

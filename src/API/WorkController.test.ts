@@ -1,3 +1,5 @@
+import { getVerifiableClaimSigner } from '@po.et/poet-js'
+
 import { Messaging } from 'Messaging/Messaging'
 import { Db, Server } from 'mongodb'
 import * as Pino from 'pino'
@@ -25,7 +27,8 @@ describe('API WorkController', async (assert: any) => {
       Pino(),
       new Db('poet', server),
       new Messaging('', exchangeConfigurationMessaging),
-      exchangeConfiguration
+      exchangeConfiguration,
+      getVerifiableClaimSigner()
     )
 
     assert({
