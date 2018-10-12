@@ -4,7 +4,6 @@ import { Db, MongoClient } from 'mongodb'
 import * as Pino from 'pino'
 
 import { createModuleLogger } from 'Helpers/Logging'
-import { Messaging } from 'Messaging/Messaging'
 
 import { HealthConfiguration } from './HealthConfiguration'
 import { HealthController } from './HealthController'
@@ -29,7 +28,6 @@ export class Health {
     this.logger.info({ configuration: this.configuration }, 'Health Starting')
     this.mongoClient = await MongoClient.connect(this.configuration.dbUrl)
     this.dbConnection = await this.mongoClient.db()
-
 
     this.initializeContainer()
 

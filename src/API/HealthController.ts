@@ -1,11 +1,10 @@
 import { inject, injectable } from 'inversify'
 import { Db, Collection } from 'mongodb'
 
-
 export const isOkOne = ({ ok }: { ok: number }) => ok === 1
 
 interface WalletInfo {
-  readonly balance: number,
+  readonly balance: number
   readonly txcount: number
 }
 
@@ -106,7 +105,7 @@ export class HealthController {
       ipfsIsConnected,
       walletInfo,
       blockchainInfo,
-      networkInfo
+      networkInfo,
     }
   }
 }

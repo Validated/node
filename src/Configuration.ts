@@ -35,7 +35,7 @@ export interface Configuration extends LoggingConfiguration, BitcoinRPCConfigura
   readonly timestampIntervalInSeconds: number
 
   readonly healthIntervalInSeconds: number
-  
+
   readonly downloadIntervalInSeconds: number
   readonly downloadRetryDelayInMinutes: number
   readonly downloadMaxAttempts: number
